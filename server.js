@@ -59,11 +59,13 @@ app.post('/api/grade', async (req, res) => {
     const sections = testData.sections;
     const prompt = `You are grading an nGenius Prep ACT bubble sheet. Extract the student information and all bubble answers.
 
+IMPORTANT: This is a custom nGenius answer sheet. ALL answer choices use A, B, C, D only (never F, G, H, J). Math questions may also have E as a 5th choice. Do NOT use F/G/H/J under any circumstances.
+
 This test has:
-- English: ${sections.english.totalQuestions} questions (Q1-Q${sections.english.totalQuestions})
-- Math: ${sections.math.totalQuestions} questions (Q1-Q${sections.math.totalQuestions})
-- Reading: ${sections.reading.totalQuestions} questions (Q1-Q${sections.reading.totalQuestions})
-- Science: ${sections.science.totalQuestions} questions (Q1-Q${sections.science.totalQuestions})
+- English: ${sections.english.totalQuestions} questions (Q1-Q${sections.english.totalQuestions}) — each question has choices A, B, C, D
+- Math: ${sections.math.totalQuestions} questions (Q1-Q${sections.math.totalQuestions}) — each question has choices A, B, C, D, E
+- Reading: ${sections.reading.totalQuestions} questions (Q1-Q${sections.reading.totalQuestions}) — each question has choices A, B, C, D
+- Science: ${sections.science.totalQuestions} questions (Q1-Q${sections.science.totalQuestions}) — each question has choices A, B, C, D
 
 Return ONLY valid JSON with this exact structure:
 {
@@ -79,7 +81,7 @@ Return ONLY valid JSON with this exact structure:
   "science": ["A","B",...]
 }
 
-Each answer array must have exactly the number of answers shown above. Use "?" for unreadable bubbles. Return ONLY the JSON object.`;
+Each answer array must have exactly the number of answers shown above. Use "?" for any bubble you cannot clearly read. Return ONLY the JSON object, no explanation.`;
 
     const response = await anthropic.messages.create({
       model: 'claude-opus-4-5',
