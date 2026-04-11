@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>nGenius Prep — ACT Score Report</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .drag-over { border-color: #1d4ed8 !important; background-color: #eff6ff !important; }
+    @media print {
+      .no-print { display: none !important; }
+      #results { display: block !important; }
+      body { background: white; }
+    }
+    .answer-cell input {
+      text-transform: uppercase;
+      caret-color: #1d4ed8;
+    }
+    .spinner { animation: spin 1s linear infinite; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .tab-active { border-bottom: 3px solid #1d4ed8; color: #1d4ed8; font-weight: 600; }
+    .tab-inactive { border-bottom: 3px solid transparent; color: #6b7280; }
+    .tab-inactive:hover { color: #1d4ed8; }
+    .score-ring { background: conic-gradient(#1d4ed8 var(--pct), #e5e7eb 0); }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+<!-- ── HEADER ── -->
+<header class="bg-white shadow-sm border-b border-gray-200 no-print">
+  <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 bg-[#1d4ed8] rounded-lg flex items-center justify-center">
+        <span class="text-white font-black text-sm">nG</span>
+      </div>
+      <div>
+        <span class="text-xl font-bold text-gray-900">nGenius Prep</span>
+        <span class="ml-2 text-sm text-gray-500">ACT Score Report</span>
+      </div>
+    </div>
+    <span id="testBadge" class="hidden bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full"></span>
+  </div>
+</header>
+
+<!-- ── MAIN ── -->
+<main class="max-w-5xl mx-auto px-4 py-8">
+
+  <!-- Test Selector -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6 no-print">
+    <label class="block text-sm font-semibold text-gray-700 mb-2">Select Practice Test</label>
+    <select id="testSelect" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm">
+      <option value="">Loading tests…</option>
+    </select>
+  </div>
+
+  <!-- Tabs -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 no-print" id="inputPanel">
+    <div class="flex border-b border-gray-200">
+      <button id="tabUpload" onclick="switchTab('upload')" class="px-6 py-4 text-sm tab-active">📷 Upload Scan</button>
+      <button id="tabManual" onclick="switchTab('manual')" class="px-6 py-4 text-sm tab-inactive">✏️ Manual Entry</button>
+    </div>
+
+    <!-- UPLOAD TAB -->
+    <div id="panelUpload" class="p-6">
+      <div id="dropZone"
+           class="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center cursor-pointer transition-all"
+           onclick="document.getElementById('fileInput').click()"
+           ondragover="handleDragOver(event)"
+           ondragleave="handleDragLeave(event)"
+           ondrop="handleDrop(event)">
+        <div class="text-4xl mb-3">📄</div>
+        <p class="text-gray-700 font-medium">Drag &amp; drop bubble sheet image here</p>
+        <p class="text-gray-400 text-sm mt-1">or click to browse — JPG, PNG supported</p>
+        <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="handleFileSelect(event)" />
+      </div>
+      <div id="imagePreview" class="hidden mt-4">
+        <img id="previewImg" class="max-h-48 rounded-lg border border-gray-200 mx-auto" />
+        <p id="imageName" class="text-center text-sm text-gray-500 mt-2"></p>
+      </div>
+      <button id="gradeBtn" onclick="gradeImage()"
+              class="hidden mt-4 w-full bg-[#1d4ed8] hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors">
+        Grade This Test →
+      </button>
+    </div>
+
+    <!-- MANUAL ENTRY TAB -->
+    <div id="panelManual" class="hidden p-6">
+      <!-- Student Info -->
+      <div class="grid grid-cols-2 gap-4 mb-6">
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Student Name</label>
+          <input id="m_name" type="text" placeholder="e.g. Jane Smith" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Test Date</label>
+          <input id="m_date" type="date" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Tutor</label>
+          <input id="m_tutor" type="text" placeholder="Tutor name" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Student Email</label>
+          <input id="m_email" type="email" placeholder="student@email.com" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+        </div>
+        <div class="col-span-2">
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Parent Email</label>
+          <input id="m_pemail" type="email" placeholder="parent@email.com" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+        </div>
+      </div>
+
+      <!-- Answer Grids -->
+      <div id="manualGrids" class="space-y-6"></div>
+
+      <button onclick="gradeManual()"
+              class="mt-6 w-full bg-[#1d4ed8] hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors">
+        Calculate Scores →
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div id="loadingBar" class="hidden mt-8 flex flex-col items-center gap-4">
+    <svg class="spinner w-10 h-10 text-[#1d4ed8]" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+    </svg>
+    <p class="text-gray-600 text-sm">Analyzing bubble sheet with AI… this may take 20–30 seconds.</p>
+  </div>
+
+  <!-- Error Banner -->
+  <div id="errorBar" class="hidden mt-6 bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm"></div>
+
+  <!-- ── RESULTS ── -->
+  <div id="results" class="hidden mt-8 space-y-6">
+
+    <!-- Print header (only shows when printing) -->
+    <div class="hidden print:block mb-6 text-center">
+      <h1 class="text-2xl font-bold text-gray-900">nGenius Prep — ACT Score Report</h1>
+      <p id="printMeta" class="text-gray-500 mt-1 text-sm"></p>
+    </div>
+
+    <!-- Student Info Banner -->
+    <div id="studentBanner" class="bg-blue-50 border border-blue-200 rounded-xl p-4 no-print">
+      <div class="flex flex-wrap gap-4 text-sm text-blue-900">
+        <span id="r_name" class="font-semibold"></span>
+        <span id="r_date"></span>
+        <span id="r_tutor"></span>
+      </div>
+    </div>
+
+    <!-- Composite Score Hero -->
+    <div class="bg-gradient-to-br from-[#1d4ed8] to-blue-600 rounded-2xl p-8 text-white text-center shadow-lg">
+      <p class="text-blue-200 text-sm font-medium uppercase tracking-wider mb-1">ACT Composite Score</p>
+      <p id="compositeScore" class="text-7xl font-black leading-none my-2">—</p>
+      <p class="text-blue-200 text-sm">out of 36</p>
+    </div>
+
+    <!-- Section Score Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5 text-center">
+        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">English</p>
+        <p id="scoreEng" class="text-4xl font-black text-[#1d4ed8]">—</p>
+        <p id="rawEng" class="text-xs text-gray-400 mt-1"></p>
+      </div>
+      <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5 text-center">
+        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Math</p>
+        <p id="scoreMath" class="text-4xl font-black text-[#1d4ed8]">—</p>
+        <p id="rawMath" class="text-xs text-gray-400 mt-1"></p>
+      </div>
+      <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5 text-center">
+        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Reading</p>
+        <p id="scoreRead" class="text-4xl font-black text-[#1d4ed8]">—</p>
+        <p id="rawRead" class="text-xs text-gray-400 mt-1"></p>
+      </div>
+      <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5 text-center">
+        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Science</p>
+        <p id="scoreSci" class="text-4xl font-black text-[#1d4ed8]">—</p>
+        <p id="rawSci" class="text-xs text-gray-400 mt-1"></p>
+      </div>
+    </div>
+
+    <!-- Category Performance -->
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+      <h2 class="text-base font-bold text-gray-900 mb-4">Category Performance</h2>
+      <div id="catBars" class="space-y-3"></div>
+    </div>
+
+    <!-- Field Questions -->
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+      <h2 class="text-base font-bold text-gray-900 mb-1">Field Test Questions (Not Scored)</h2>
+      <p class="text-xs text-gray-500 mb-4">These are embedded research questions used by ACT to evaluate potential future test items. They do not affect your score.</p>
+      <div id="fieldTable"></div>
+    </div>
+
+    <!-- Missed Questions -->
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+      <h2 class="text-base font-bold text-gray-900 mb-4">Missed Questions</h2>
+      <div id="missedTable"></div>
+    </div>
+
+    <!-- Study Recommendations -->
+    <div id="recsPanel" class="bg-amber-50 border border-amber-200 rounded-xl p-6">
+      <h2 class="text-base font-bold text-amber-900 mb-3">📚 Study Recommendations</h2>
+      <p class="text-xs text-amber-700 mb-4">Categories below 75% accuracy that need attention:</p>
+      <div id="recsList"></div>
+    </div>
+
+    <!-- Export Buttons -->
+    <div class="flex gap-3 no-print">
+      <button onclick="exportPDF()" class="flex-1 bg-gray-900 hover:bg-gray-700 text-white font-semibold py-3 px-5 rounded-lg text-sm transition-colors">
+        🖨️ Print / Save PDF
+      </button>
+      <button onclick="exportCSV()" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-5 rounded-lg text-sm transition-colors">
+        📊 Export CSV
+      </button>
+    </div>
+
+    <!-- Reset -->
+    <div class="text-center no-print">
+      <button onclick="resetApp()" class="text-sm text-gray-500 hover:text-gray-700 underline">Grade another test</button>
+    </div>
+  </div>
+</main>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+let currentTestId = null;
+let currentTestData = null;
+let gradingResults = null;
+let selectedFile = null;
+let selectedFileMime = null;
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+async function init() {
+  try {
+    const resp = await fetch('/api/tests');
+    const tests = await resp.json();
+    const sel = document.getElementById('testSelect');
+    sel.innerHTML = '<option value="">— Select a test —</option>';
+    for (const t of tests) {
+      const opt = document.createElement('option');
+      opt.value = t.testId;
+      opt.textContent = t.testName;
+      sel.appendChild(opt);
+    }
+    sel.addEventListener('change', onTestChange);
+  } catch(e) {
+    showError('Could not load test list: ' + e.message);
+  }
+}
+
+async function onTestChange() {
+  const sel = document.getElementById('testSelect');
+  currentTestId = sel.value;
+  if (!currentTestId) { currentTestData = null; return; }
+  try {
+    const resp = await fetch('/api/tests/' + encodeURIComponent(currentTestId));
+    currentTestData = await resp.json();
+    document.getElementById('testBadge').textContent = currentTestData.testName;
+    document.getElementById('testBadge').classList.remove('hidden');
+    buildManualGrids();
+    hideError();
+    document.getElementById('results').classList.add('hidden');
+  } catch(e) {
+    showError('Could not load test data: ' + e.message);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════════════════
+function switchTab(tab) {
+  document.getElementById('panelUpload').classList.toggle('hidden', tab !== 'upload');
+  document.getElementById('panelManual').classList.toggle('hidden', tab !== 'manual');
+  document.getElementById('tabUpload').className = 'px-6 py-4 text-sm ' + (tab === 'upload' ? 'tab-active' : 'tab-inactive');
+  document.getElementById('tabManual').className = 'px-6 py-4 text-sm ' + (tab === 'manual' ? 'tab-active' : 'tab-inactive');
+}
+
+// ═══════════════════════════════════════════════════════════
+// FILE UPLOAD
+// ═══════════════════════════════════════════════════════════
+function handleDragOver(e) { e.preventDefault(); document.getElementById('dropZone').classList.add('drag-over'); }
+function handleDragLeave(e) { document.getElementById('dropZone').classList.remove('drag-over'); }
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('dropZone').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) loadFile(file);
+}
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (file) loadFile(file);
+}
+function loadFile(file) {
+  selectedFile = file;
+  selectedFileMime = file.type || 'image/jpeg';
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    document.getElementById('previewImg').src = e.target.result;
+    document.getElementById('imageName').textContent = file.name;
+    document.getElementById('imagePreview').classList.remove('hidden');
+    document.getElementById('gradeBtn').classList.remove('hidden');
+  };
+  reader.readAsDataURL(file);
+}
+
+async function gradeImage() {
+  if (!selectedFile) return showError('Please select an image first.');
+  if (!currentTestId) return showError('Please select a test first.');
+  showLoading(true);
+  hideError();
+  try {
+    const base64 = await fileToBase64(selectedFile);
+    const resp = await fetch('/api/grade', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageBase64: base64, mimeType: selectedFileMime, testId: currentTestId })
+    });
+    if (!resp.ok) {
+      const err = await resp.json();
+      throw new Error(err.error || 'Server error');
+    }
+    const extracted = await resp.json();
+    renderResults(extracted);
+  } catch(e) {
+    showError('Grading failed: ' + e.message);
+  } finally {
+    showLoading(false);
+  }
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// MANUAL ENTRY
+// ═══════════════════════════════════════════════════════════
+function buildManualGrids() {
+  if (!currentTestData) return;
+  const container = document.getElementById('manualGrids');
+  container.innerHTML = '';
+  const sections = [
+    { key: 'english', label: 'English', color: 'blue' },
+    { key: 'math',    label: 'Math',    color: 'purple' },
+    { key: 'reading', label: 'Reading', color: 'green' },
+    { key: 'science', label: 'Science', color: 'orange' }
+  ];
+  for (const sec of sections) {
+    const total = currentTestData.sections[sec.key].totalQuestions;
+    const div = document.createElement('div');
+    div.innerHTML = `
+      <h3 class="text-sm font-bold text-gray-700 mb-3">${sec.label} <span class="text-gray-400 font-normal">(${total} questions)</span></h3>
+      <div class="grid gap-2" style="grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));" id="grid_${sec.key}"></div>
+    `;
+    container.appendChild(div);
+    const grid = div.querySelector(`#grid_${sec.key}`);
+    for (let i = 1; i <= total; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'answer-cell flex flex-col items-center';
+      cell.innerHTML = `
+        <span class="text-xs text-gray-400 mb-0.5">${i}</span>
+        <input type="text" maxlength="1" id="ans_${sec.key}_${i}"
+               class="w-10 h-10 text-center border border-gray-300 rounded-lg text-sm font-bold uppercase focus:ring-2 focus:ring-blue-500 outline-none"
+               oninput="this.value=this.value.toUpperCase().replace(/[^A-J?]/g,'')" />
+      `;
+      grid.appendChild(cell);
+    }
+  }
+}
+
+function gradeManual() {
+  if (!currentTestData) return showError('Please select a test first.');
+  const sections = ['english', 'math', 'reading', 'science'];
+  const answers = {};
+  let valid = true;
+  for (const sec of sections) {
+    const total = currentTestData.sections[sec].totalQuestions;
+    answers[sec] = [];
+    for (let i = 1; i <= total; i++) {
+      const val = (document.getElementById(`ans_${sec}_${i}`)?.value || '?').toUpperCase();
+      answers[sec].push(val || '?');
+    }
+  }
+  if (!valid) return;
+  const extracted = {
+    studentName: document.getElementById('m_name').value || 'Unknown',
+    testDate: document.getElementById('m_date').value || '',
+    tutor: document.getElementById('m_tutor').value || '',
+    studentEmail: document.getElementById('m_email').value || '',
+    parentEmail: document.getElementById('m_pemail').value || '',
+    ...answers
+  };
+  renderResults(extracted);
+}
+
+// ═══════════════════════════════════════════════════════════
+// GRADING LOGIC
+// ═══════════════════════════════════════════════════════════
+function invertScaleTable(scaleObj) {
+  // scaleObj: { "36": [40], "35": [38,39], ... }
+  // returns: { 40: 36, 38: 35, 39: 35, ... }
+  const inv = {};
+  for (const [scale, raws] of Object.entries(scaleObj)) {
+    for (const raw of raws) inv[raw] = parseInt(scale);
+  }
+  return inv;
+}
+
+function getScaleScore(raw, invTable, maxRaw) {
+  // Direct lookup; if missing, find nearest lower raw
+  if (invTable[raw] !== undefined) return invTable[raw];
+  for (let r = raw - 1; r >= 0; r--) {
+    if (invTable[r] !== undefined) return invTable[r];
+  }
+  return 1;
+}
+
+function gradeSection(studentAnswers, questions, scaleInv) {
+  let rawCorrect = 0;
+  const missed = [];
+  const fieldResults = [];
+  const catStats = {}; // cat → { correct, total }
+
+  for (const q of questions) {
+    const studentAns = (studentAnswers[q.number - 1] || '?').toUpperCase();
+    const correct = q.answer.toUpperCase();
+    if (q.field) {
+      fieldResults.push({ number: q.number, studentAns, correct, isCorrect: studentAns === correct });
+    } else {
+      const cat = q.category;
+      if (!catStats[cat]) catStats[cat] = { correct: 0, total: 0 };
+      catStats[cat].total++;
+      if (studentAns === correct) {
+        rawCorrect++;
+        catStats[cat].correct++;
+      } else {
+        missed.push({ number: q.number, studentAns, correct, category: cat });
+      }
+    }
+  }
+
+  const scaleScore = getScaleScore(rawCorrect, scaleInv, questions.filter(q => !q.field).length);
+  return { rawCorrect, scaleScore, missed, fieldResults, catStats };
+}
+
+function renderResults(extracted) {
+  if (!currentTestData) return showError('No test data loaded.');
+  gradingResults = { extracted };
+
+  const td = currentTestData;
+  const sections = ['english', 'math', 'reading', 'science'];
+  const sectionResults = {};
+
+  for (const sec of sections) {
+    const inv = invertScaleTable(td.scaleScores[sec]);
+    sectionResults[sec] = gradeSection(
+      extracted[sec] || [],
+      td.sections[sec].questions,
+      inv
+    );
+  }
+
+  gradingResults.sectionResults = sectionResults;
+  gradingResults.extracted = extracted;
+
+  // Composite
+  const scores = sections.map(s => sectionResults[s].scaleScore);
+  const composite = Math.round(scores.reduce((a,b) => a+b, 0) / 4);
+
+  // ── Student Banner ──
+  document.getElementById('r_name').textContent = extracted.studentName || '';
+  document.getElementById('r_date').textContent = extracted.testDate ? '📅 ' + extracted.testDate : '';
+  document.getElementById('r_tutor').textContent = extracted.tutor ? '👤 Tutor: ' + extracted.tutor : '';
+  if (!extracted.studentName && !extracted.testDate) {
+    document.getElementById('studentBanner').classList.add('hidden');
+  } else {
+    document.getElementById('studentBanner').classList.remove('hidden');
+  }
+
+  // ── Composite ──
+  document.getElementById('compositeScore').textContent = composite;
+
+  // ── Section Cards ──
+  const cardMap = { english: 'Eng', math: 'Math', reading: 'Read', science: 'Sci' };
+  const idMap = { english: 'Eng', math: 'Math', reading: 'Read', science: 'Sci' };
+  for (const sec of sections) {
+    const r = sectionResults[sec];
+    const total = td.sections[sec].questions.filter(q => !q.field).length;
+    document.getElementById('score' + idMap[sec]).textContent = r.scaleScore;
+    document.getElementById('raw' + idMap[sec]).textContent = `${r.rawCorrect}/${total} correct`;
+  }
+
+  // ── Category Bars ──
+  const catBarsEl = document.getElementById('catBars');
+  catBarsEl.innerHTML = '';
+  const sectionLabels = { english: 'English', math: 'Math', reading: 'Reading', science: 'Science' };
+  for (const sec of sections) {
+    const stats = sectionResults[sec].catStats;
+    for (const [cat, data] of Object.entries(stats)) {
+      const pct = Math.round((data.correct / data.total) * 100);
+      const color = pct >= 75 ? 'bg-green-500' : pct >= 50 ? 'bg-amber-400' : 'bg-red-500';
+      catBarsEl.innerHTML += `
+        <div class="flex items-center gap-3">
+          <div class="w-32 text-right">
+            <span class="text-xs font-semibold text-gray-500">${sectionLabels[sec]}</span>
+            <span class="ml-1 text-xs font-bold text-gray-800">${cat}</span>
+          </div>
+          <div class="flex-1 bg-gray-100 rounded-full h-4 overflow-hidden">
+            <div class="${color} h-full rounded-full transition-all" style="width:${pct}%"></div>
+          </div>
+          <div class="w-20 text-xs text-gray-600">${data.correct}/${data.total} <span class="font-semibold">${pct}%</span></div>
+        </div>
+      `;
+    }
+  }
+
+  // ── Field Questions ──
+  const fieldEl = document.getElementById('fieldTable');
+  let fieldRows = '';
+  for (const sec of sections) {
+    for (const fq of sectionResults[sec].fieldResults) {
+      const icon = fq.isCorrect ? '✅' : '❌';
+      fieldRows += `<tr class="border-b border-gray-100 text-sm">
+        <td class="py-2 px-3 text-gray-500">${sectionLabels[sec]}</td>
+        <td class="py-2 px-3 font-medium">Q${fq.number}</td>
+        <td class="py-2 px-3">${fq.studentAns}</td>
+        <td class="py-2 px-3">${fq.correct}</td>
+        <td class="py-2 px-3">${icon}</td>
+      </tr>`;
+    }
+  }
+  fieldEl.innerHTML = `<table class="w-full text-sm">
+    <thead><tr class="bg-gray-50 text-xs font-semibold text-gray-500 uppercase">
+      <th class="py-2 px-3 text-left">Section</th>
+      <th class="py-2 px-3 text-left">Question</th>
+      <th class="py-2 px-3 text-left">Student</th>
+      <th class="py-2 px-3 text-left">Correct</th>
+      <th class="py-2 px-3 text-left">Match</th>
+    </tr></thead>
+    <tbody>${fieldRows || '<tr><td colspan="5" class="py-4 text-center text-gray-400 text-xs">No field questions</td></tr>'}</tbody>
+  </table>`;
+
+  // ── Missed Questions ──
+  const missedEl = document.getElementById('missedTable');
+  let totalMissed = 0;
+  let allMissedRows = '';
+  for (const sec of sections) {
+    for (const m of sectionResults[sec].missed) {
+      totalMissed++;
+      allMissedRows += `<tr class="border-b border-gray-100 text-sm">
+        <td class="py-2 px-3 text-gray-500">${sectionLabels[sec]}</td>
+        <td class="py-2 px-3 font-medium">Q${m.number}</td>
+        <td class="py-2 px-3 text-red-600 font-bold">${m.studentAns}</td>
+        <td class="py-2 px-3 text-green-700 font-bold">${m.correct}</td>
+        <td class="py-2 px-3 text-xs text-gray-500">${m.category}</td>
+      </tr>`;
+    }
+  }
+  missedEl.innerHTML = totalMissed === 0
+    ? '<p class="text-green-600 font-semibold text-sm">🎉 Perfect score! No missed questions.</p>'
+    : `<table class="w-full text-sm">
+        <thead><tr class="bg-gray-50 text-xs font-semibold text-gray-500 uppercase">
+          <th class="py-2 px-3 text-left">Section</th>
+          <th class="py-2 px-3 text-left">Question</th>
+          <th class="py-2 px-3 text-left">Answered</th>
+          <th class="py-2 px-3 text-left">Correct</th>
+          <th class="py-2 px-3 text-left">Category</th>
+        </tr></thead>
+        <tbody>${allMissedRows}</tbody>
+      </table>`;
+
+  // ── Recommendations ──
+  const recsList = document.getElementById('recsList');
+  const recsPanel = document.getElementById('recsPanel');
+  const weakCats = [];
+  for (const sec of sections) {
+    for (const [cat, data] of Object.entries(sectionResults[sec].catStats)) {
+      const pct = Math.round((data.correct / data.total) * 100);
+      if (pct < 75) weakCats.push({ sec: sectionLabels[sec], cat, pct, correct: data.correct, total: data.total });
+    }
+  }
+  if (weakCats.length === 0) {
+    recsPanel.classList.add('hidden');
+  } else {
+    recsPanel.classList.remove('hidden');
+    recsList.innerHTML = weakCats.sort((a,b) => a.pct - b.pct).map(w =>
+      `<div class="flex items-center gap-3 mb-2">
+        <span class="inline-block w-2 h-2 rounded-full bg-amber-500"></span>
+        <span class="text-sm text-amber-900"><strong>${w.sec} – ${w.cat}</strong>: ${w.correct}/${w.total} correct (${w.pct}%) — needs review</span>
+      </div>`
+    ).join('');
+  }
+
+  // Show results
+  document.getElementById('results').classList.remove('hidden');
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ═══════════════════════════════════════════════════════════
+// EXPORTS
+// ═══════════════════════════════════════════════════════════
+function exportPDF() { window.print(); }
+
+function exportCSV() {
+  if (!gradingResults) return;
+  const { extracted, sectionResults } = gradingResults;
+  const td = currentTestData;
+  const sections = ['english', 'math', 'reading', 'science'];
+  const rows = [['Student', 'Test', 'Section', 'Question', 'Answered', 'Correct', 'IsCorrect', 'IsField', 'Category']];
+
+  for (const sec of sections) {
+    for (const q of td.sections[sec].questions) {
+      const studentAns = (extracted[sec][q.number - 1] || '?').toUpperCase();
+      rows.push([
+        extracted.studentName || '',
+        td.testName,
+        sec,
+        q.number,
+        studentAns,
+        q.answer,
+        String(studentAns === q.answer),
+        String(q.field),
+        q.category
+      ]);
+    }
+  }
+
+  const csv = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `ACT_${(extracted.studentName || 'student').replace(/\s+/g,'_')}_${td.testId}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ═══════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════
+function showLoading(show) {
+  document.getElementById('loadingBar').classList.toggle('hidden', !show);
+  document.getElementById('inputPanel').classList.toggle('hidden', show);
+}
+function showError(msg) {
+  const el = document.getElementById('errorBar');
+  el.textContent = '⚠️ ' + msg;
+  el.classList.remove('hidden');
+}
+function hideError() { document.getElementById('errorBar').classList.add('hidden'); }
+function resetApp() {
+  document.getElementById('results').classList.add('hidden');
+  document.getElementById('inputPanel').classList.remove('hidden');
+  document.getElementById('imagePreview').classList.add('hidden');
+  document.getElementById('gradeBtn').classList.add('hidden');
+  selectedFile = null;
+  document.getElementById('fileInput').value = '';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+init();
+</script>
+</body>
+</html>
