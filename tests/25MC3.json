@@ -4,7 +4,7 @@
   "sections": {
     "english": {
       "totalQuestions": 50,
-      "scoredCount": 38,
+      "scoredCount": 40,
       "questions": [
         {
           "number": 1,
@@ -177,14 +177,14 @@
         {
           "number": 29,
           "answer": "C",
-          "field": true,
-          "category": "FIELD"
+          "field": false,
+          "category": "CSE"
         },
         {
           "number": 30,
           "answer": "D",
-          "field": true,
-          "category": "FIELD"
+          "field": false,
+          "category": "KLA"
         },
         {
           "number": 31,
@@ -256,19 +256,19 @@
           "number": 42,
           "answer": "A",
           "field": false,
-          "category": "KLA"
+          "category": "CSE"
         },
         {
           "number": 43,
           "answer": "C",
           "field": false,
-          "category": "CSE"
+          "category": "KLA"
         },
         {
           "number": 44,
           "answer": "D",
           "field": false,
-          "category": "CSE"
+          "category": "KLA"
         },
         {
           "number": 45,
