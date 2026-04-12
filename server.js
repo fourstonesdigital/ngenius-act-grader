@@ -57,12 +57,12 @@ app.post('/api/grade', async (req, res) => {
     if (!testData) return res.status(404).json({ error: 'Test not found' });
 
     const sections = testData.sections;
-    const prompt = `You are grading an nGenius Prep ACT bubble sheet. Extract the student information and all bubble answers.
+    const isPDF = mimeType === 'application/pdf';
+    const prompt = `You are grading an nGenius Prep ACT bubble sheet.${isPDF ? ' This is a PDF — read the FIRST PAGE ONLY and ignore any additional pages.' : ''} Extract the student information and all bubble answers.
 
 IMPORTANT — Answer choice format: This sheet uses the standard ACT alternating format:
 - ODD-numbered questions (1, 3, 5, ...): choices are A, B, C, D
 - EVEN-numbered questions (2, 4, 6, ...): choices are F, G, H, J
-- Math questions 41-45 are odd-numbered so use A, B, C, D
 
 This test has:
 - English: ${sections.english.totalQuestions} questions (Q1-Q${sections.english.totalQuestions})
@@ -86,15 +86,17 @@ Return ONLY valid JSON with this exact structure:
 
 Each answer array must have exactly the number of answers shown above, in order Q1, Q2, Q3... Use "?" for any bubble you cannot clearly read. Return ONLY the JSON object, no explanation.`;
 
+    const isPDF = mimeType === 'application/pdf';
+    const mediaBlock = isPDF
+      ? { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: imageBase64 } }
+      : { type: 'image', source: { type: 'base64', media_type: mimeType, data: imageBase64 } };
+
     const response = await anthropic.messages.create({
       model: 'claude-opus-4-5',
       max_tokens: 2000,
       messages: [{
         role: 'user',
-        content: [
-          { type: 'image', source: { type: 'base64', media_type: mimeType, data: imageBase64 } },
-          { type: 'text', text: prompt }
-        ]
+        content: [ mediaBlock, { type: 'text', text: prompt } ]
       }]
     });
 
