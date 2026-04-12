@@ -4,7 +4,7 @@
   "sections": {
     "english": {
       "totalQuestions": 50,
-      "scoredCount": 40,
+      "scoredCount": 38,
       "questions": [
         {
           "number": 1,
@@ -177,14 +177,14 @@
         {
           "number": 29,
           "answer": "C",
-          "field": false,
-          "category": "CSE"
+          "field": true,
+          "category": "FIELD"
         },
         {
           "number": 30,
           "answer": "D",
-          "field": false,
-          "category": "KLA"
+          "field": true,
+          "category": "FIELD"
         },
         {
           "number": 31,
@@ -201,56 +201,56 @@
         {
           "number": 33,
           "answer": "C",
-          "field": false,
-          "category": "CSE"
+          "field": true,
+          "category": "FIELD"
         },
         {
           "number": 34,
           "answer": "D",
-          "field": false,
-          "category": "CSE"
+          "field": true,
+          "category": "FIELD"
         },
         {
           "number": 35,
           "answer": "B",
-          "field": false,
-          "category": "KLA"
+          "field": true,
+          "category": "FIELD"
         },
         {
           "number": 36,
           "answer": "D",
-          "field": false,
-          "category": "KLA"
+          "field": true,
+          "category": "FIELD"
         },
         {
           "number": 37,
           "answer": "A",
-          "field": false,
-          "category": "KLA"
+          "field": true,
+          "category": "FIELD"
         },
         {
           "number": 38,
           "answer": "A",
-          "field": false,
-          "category": "KLA"
+          "field": true,
+          "category": "FIELD"
         },
         {
           "number": 39,
           "answer": "B",
-          "field": false,
-          "category": "KLA"
+          "field": true,
+          "category": "FIELD"
         },
         {
           "number": 40,
           "answer": "A",
-          "field": false,
-          "category": "KLA"
+          "field": true,
+          "category": "FIELD"
         },
         {
           "number": 41,
           "answer": "A",
           "field": false,
-          "category": "KLA"
+          "category": "CSE"
         },
         {
           "number": 42,
@@ -261,50 +261,50 @@
         {
           "number": 43,
           "answer": "C",
-          "field": true,
-          "category": "FIELD"
+          "field": false,
+          "category": "CSE"
         },
         {
           "number": 44,
           "answer": "D",
-          "field": true,
-          "category": "FIELD"
+          "field": false,
+          "category": "CSE"
         },
         {
           "number": 45,
           "answer": "D",
-          "field": true,
-          "category": "FIELD"
+          "field": false,
+          "category": "KLA"
         },
         {
           "number": 46,
           "answer": "D",
-          "field": true,
-          "category": "FIELD"
+          "field": false,
+          "category": "KLA"
         },
         {
           "number": 47,
           "answer": "B",
-          "field": true,
-          "category": "FIELD"
+          "field": false,
+          "category": "KLA"
         },
         {
           "number": 48,
           "answer": "D",
-          "field": true,
-          "category": "FIELD"
+          "field": false,
+          "category": "KLA"
         },
         {
           "number": 49,
           "answer": "D",
-          "field": true,
-          "category": "FIELD"
+          "field": false,
+          "category": "KLA"
         },
         {
           "number": 50,
           "answer": "A",
-          "field": true,
-          "category": "FIELD"
+          "field": false,
+          "category": "KLA"
         }
       ]
     },
@@ -345,8 +345,8 @@
         {
           "number": 6,
           "answer": "B",
-          "field": true,
-          "category": "FIELD"
+          "field": false,
+          "category": "PHM-F"
         },
         {
           "number": 7,
@@ -358,121 +358,121 @@
           "number": 8,
           "answer": "C",
           "field": false,
-          "category": "PHM-F"
+          "category": "PHM-G"
         },
         {
           "number": 9,
           "answer": "C",
           "field": false,
-          "category": "PHM-G"
+          "category": "IES"
         },
         {
           "number": 10,
           "answer": "B",
           "field": false,
-          "category": "IES"
+          "category": "PHM-A"
         },
         {
           "number": 11,
           "answer": "D",
           "field": false,
-          "category": "PHM-A"
+          "category": "PHM-F"
         },
         {
           "number": 12,
           "answer": "B",
           "field": false,
-          "category": "PHM-F"
+          "category": "PHM-G"
         },
         {
           "number": 13,
           "answer": "B",
           "field": false,
-          "category": "PHM-G"
+          "category": "PHM-N"
         },
         {
           "number": 14,
           "answer": "A",
           "field": false,
-          "category": "PHM-N"
+          "category": "PHM-A"
         },
         {
           "number": 15,
           "answer": "B",
           "field": false,
-          "category": "PHM-A"
+          "category": "PHM-F"
         },
         {
           "number": 16,
           "answer": "D",
-          "field": true,
-          "category": "FIELD"
+          "field": false,
+          "category": "PHM-G"
         },
         {
           "number": 17,
           "answer": "B",
-          "field": false,
-          "category": "PHM-F"
+          "field": true,
+          "category": "FIELD"
         },
         {
           "number": 18,
           "answer": "C",
           "field": false,
-          "category": "PHM-G"
+          "category": "PHM-S"
         },
         {
           "number": 19,
           "answer": "B",
           "field": false,
-          "category": "PHM-S"
+          "category": "PHM-A"
         },
         {
           "number": 20,
           "answer": "C",
           "field": false,
-          "category": "PHM-A"
+          "category": "PHM-F"
         },
         {
           "number": 21,
           "answer": "A",
           "field": false,
-          "category": "PHM-F"
+          "category": "PHM-G"
         },
         {
           "number": 22,
           "answer": "C",
           "field": false,
-          "category": "PHM-G"
+          "category": "PHM-A"
         },
         {
           "number": 23,
           "answer": "D",
           "field": false,
-          "category": "PHM-A"
+          "category": "PHM-S"
         },
         {
           "number": 24,
           "answer": "C",
           "field": false,
-          "category": "PHM-S"
+          "category": "PHM-F"
         },
         {
           "number": 25,
           "answer": "B",
           "field": false,
-          "category": "PHM-F"
+          "category": "PHM-G"
         },
         {
           "number": 26,
           "answer": "C",
           "field": false,
-          "category": "PHM-G"
+          "category": "PHM-A"
         },
         {
           "number": 27,
           "answer": "C",
           "field": false,
-          "category": "PHM-A"
+          "category": "IES"
         },
         {
           "number": 28,
@@ -484,67 +484,67 @@
           "number": 29,
           "answer": "A",
           "field": false,
-          "category": "IES"
+          "category": "PHM-F"
         },
         {
           "number": 30,
           "answer": "B",
           "field": false,
-          "category": "PHM-F"
+          "category": "PHM-G"
         },
         {
           "number": 31,
           "answer": "C",
           "field": false,
-          "category": "PHM-G"
+          "category": "PHM-S"
         },
         {
           "number": 32,
           "answer": "C",
           "field": false,
-          "category": "PHM-S"
+          "category": "PHM-A"
         },
         {
           "number": 33,
           "answer": "D",
           "field": false,
-          "category": "PHM-A"
+          "category": "PHM-N"
         },
         {
           "number": 34,
           "answer": "A",
           "field": false,
-          "category": "PHM-N"
+          "category": "IES"
         },
         {
           "number": 35,
           "answer": "B",
           "field": false,
-          "category": "IES"
+          "category": "MDL"
         },
         {
           "number": 36,
           "answer": "A",
           "field": false,
-          "category": "MDL"
+          "category": "PHM-F"
         },
         {
           "number": 37,
           "answer": "A",
           "field": false,
-          "category": "PHM-F"
+          "category": "IES"
         },
         {
           "number": 38,
           "answer": "B",
           "field": false,
-          "category": "IES"
+          "category": "MDL"
         },
         {
           "number": 39,
           "answer": "A",
-          "field": false,
-          "category": "MDL"
+          "field": true,
+          "category": "FIELD"
         },
         {
           "number": 40,
@@ -651,14 +651,14 @@
         {
           "number": 11,
           "answer": "A",
-          "field": false,
-          "category": "CS"
+          "field": true,
+          "category": "FIELD"
         },
         {
           "number": 12,
           "answer": "B",
-          "field": false,
-          "category": "KID"
+          "field": true,
+          "category": "FIELD"
         },
         {
           "number": 13,
@@ -699,20 +699,20 @@
         {
           "number": 19,
           "answer": "B",
-          "field": false,
-          "category": "CS"
+          "field": true,
+          "category": "FIELD"
         },
         {
           "number": 20,
           "answer": "B",
           "field": false,
-          "category": "KID"
+          "category": "CS"
         },
         {
           "number": 21,
           "answer": "D",
           "field": false,
-          "category": "IKI"
+          "category": "KID"
         },
         {
           "number": 22,
@@ -730,19 +730,19 @@
           "number": 24,
           "answer": "C",
           "field": false,
-          "category": "CS"
+          "category": "IKI"
         },
         {
           "number": 25,
           "answer": "C",
           "field": false,
-          "category": "KID"
+          "category": "CS"
         },
         {
           "number": 26,
           "answer": "A",
           "field": false,
-          "category": "IKI"
+          "category": "KID"
         },
         {
           "number": 27,
@@ -766,13 +766,13 @@
           "number": 30,
           "answer": "B",
           "field": false,
-          "category": "KID"
+          "category": "CS"
         },
         {
           "number": 31,
           "answer": "A",
           "field": false,
-          "category": "IKI"
+          "category": "KID"
         },
         {
           "number": 32,
@@ -784,25 +784,25 @@
           "number": 33,
           "answer": "C",
           "field": false,
-          "category": "IKI"
+          "category": "KID"
         },
         {
           "number": 34,
           "answer": "B",
-          "field": true,
-          "category": "FIELD"
+          "field": false,
+          "category": "IKI"
         },
         {
           "number": 35,
           "answer": "D",
-          "field": true,
-          "category": "FIELD"
+          "field": false,
+          "category": "IKI"
         },
         {
           "number": 36,
           "answer": "D",
-          "field": true,
-          "category": "FIELD"
+          "field": false,
+          "category": "IKI"
         }
       ]
     },
@@ -903,8 +903,8 @@
         {
           "number": 16,
           "answer": "A",
-          "field": true,
-          "category": "FIELD"
+          "field": false,
+          "category": "SIN"
         },
         {
           "number": 17,
@@ -939,8 +939,8 @@
         {
           "number": 22,
           "answer": "B",
-          "field": false,
-          "category": "SIN"
+          "field": true,
+          "category": "FIELD"
         },
         {
           "number": 23,
@@ -986,7 +986,7 @@
         },
         {
           "number": 30,
-          "answer": "C",
+          "answer": "B",
           "field": false,
           "category": "IOD"
         },
@@ -1055,136 +1055,177 @@
   },
   "scaleScores": {
     "english": {
-      "1": [
-        0
+      "36": [
+        40
       ],
-      "2": [
-        1
+      "35": [
+        38,
+        39
       ],
-      "4": [
-        2
+      "32": [
+        35
       ],
-      "5": [
-        3
+      "30": [
+        34
       ],
-      "6": [
-        4
+      "29": [
+        33
       ],
-      "7": [
-        5
+      "28": [
+        32
       ],
-      "8": [
-        6
+      "27": [
+        31
       ],
-      "9": [
-        7
+      "26": [
+        30
+      ],
+      "25": [
+        29
+      ],
+      "24": [
+        27,
+        28
+      ],
+      "23": [
+        26
+      ],
+      "22": [
+        24,
+        25
+      ],
+      "21": [
+        22,
+        23
+      ],
+      "20": [
+        21
+      ],
+      "19": [
+        20
+      ],
+      "18": [
+        19
+      ],
+      "17": [
+        18
+      ],
+      "16": [
+        17
+      ],
+      "15": [
+        15,
+        16
+      ],
+      "14": [
+        14
+      ],
+      "13": [
+        13
+      ],
+      "12": [
+        12
       ],
       "10": [
         8,
         9,
         10
       ],
-      "11": [
-        11
+      "9": [
+        7
       ],
-      "12": [
-        12
+      "8": [
+        6
       ],
-      "13": [
-        13
+      "7": [
+        5
       ],
-      "14": [
-        14
+      "6": [
+        4
       ],
-      "15": [
-        15,
-        16
+      "5": [
+        3
       ],
-      "16": [
-        17
+      "4": [
+        2
       ],
-      "17": [
-        18
+      "2": [
+        1
       ],
-      "18": [
-        19
-      ],
-      "19": [
-        20
-      ],
-      "20": [
-        21
-      ],
-      "21": [
-        22,
-        23
-      ],
-      "22": [
-        24,
-        25
-      ],
-      "23": [
-        26
-      ],
-      "24": [
-        27,
-        28
-      ],
-      "25": [
-        29
-      ],
-      "26": [
-        30
-      ],
-      "27": [
-        31
-      ],
-      "28": [
-        32
-      ],
-      "29": [
-        33
-      ],
-      "30": [
-        34
-      ],
-      "32": [
-        35
-      ],
-      "34": [
-        36,
-        37
+      "1": [
+        0
+      ]
+    },
+    "math": {
+      "36": [
+        40,
+        41
       ],
       "35": [
         38,
         39
       ],
-      "36": [
-        40
-      ]
-    },
-    "math": {
-      "1": [
-        0
+      "34": [
+        36,
+        37
       ],
-      "4": [
-        1
+      "33": [
+        35
       ],
-      "7": [
-        2
+      "31": [
+        34
       ],
-      "9": [
-        3
+      "30": [
+        33
       ],
-      "11": [
-        4
+      "29": [
+        32
       ],
-      "12": [
-        5
+      "28": [
+        31
       ],
-      "13": [
-        6,
-        7
+      "27": [
+        30
+      ],
+      "26": [
+        28,
+        29
+      ],
+      "25": [
+        27
+      ],
+      "24": [
+        26
+      ],
+      "22": [
+        25
+      ],
+      "21": [
+        24
+      ],
+      "20": [
+        23
+      ],
+      "19": [
+        22
+      ],
+      "18": [
+        20,
+        21
+      ],
+      "17": [
+        17,
+        18,
+        19
+      ],
+      "16": [
+        15,
+        16
+      ],
+      "15": [
+        12,
+        13,
+        14
       ],
       "14": [
         8,
@@ -1192,254 +1233,206 @@
         10,
         11
       ],
-      "15": [
-        12,
-        13,
-        14
+      "13": [
+        6,
+        7
       ],
-      "16": [
-        15,
-        16
+      "12": [
+        5
       ],
-      "17": [
-        17,
-        18,
-        19
-      ],
-      "18": [
-        20,
-        21
-      ],
-      "19": [
-        22
-      ],
-      "20": [
-        23
-      ],
-      "21": [
-        24
-      ],
-      "22": [
-        25
-      ],
-      "24": [
-        26
-      ],
-      "25": [
-        27
-      ],
-      "26": [
-        28,
-        29
-      ],
-      "27": [
-        30
-      ],
-      "28": [
-        31
-      ],
-      "29": [
-        32
-      ],
-      "30": [
-        33
-      ],
-      "31": [
-        34
-      ],
-      "33": [
-        35
-      ],
-      "34": [
-        36,
-        37
-      ],
-      "35": [
-        38,
-        39
-      ],
-      "36": [
-        40,
-        41
-      ]
-    },
-    "reading": {
-      "1": [
-        0
-      ],
-      "2": [
-        1
-      ],
-      "4": [
-        2
-      ],
-      "6": [
-        3
-      ],
-      "7": [
+      "11": [
         4
       ],
       "9": [
-        5
+        3
       ],
-      "10": [
-        6
+      "7": [
+        2
+      ],
+      "4": [
+        1
+      ],
+      "1": [
+        0
+      ]
+    },
+    "reading": {
+      "36": [
+        27
+      ],
+      "35": [
+        26
+      ],
+      "33": [
+        25
+      ],
+      "31": [
+        24
+      ],
+      "29": [
+        23
+      ],
+      "28": [
+        22
+      ],
+      "27": [
+        21
+      ],
+      "25": [
+        20
+      ],
+      "24": [
+        18,
+        19
+      ],
+      "23": [
+        17
+      ],
+      "22": [
+        16
+      ],
+      "21": [
+        15
+      ],
+      "19": [
+        14
+      ],
+      "18": [
+        13
+      ],
+      "17": [
+        12
+      ],
+      "15": [
+        11
+      ],
+      "14": [
+        10
+      ],
+      "13": [
+        9
       ],
       "11": [
         7,
         8
       ],
-      "13": [
-        9
+      "10": [
+        6
       ],
-      "14": [
-        10
+      "9": [
+        5
       ],
-      "15": [
-        11
+      "7": [
+        4
       ],
-      "17": [
-        12
+      "6": [
+        3
       ],
-      "18": [
-        13
+      "4": [
+        2
       ],
-      "19": [
-        14
+      "2": [
+        1
       ],
-      "21": [
-        15
-      ],
-      "22": [
-        16
-      ],
-      "23": [
-        17
-      ],
-      "24": [
-        18,
-        19
-      ],
-      "25": [
-        20
-      ],
-      "27": [
-        21
-      ],
-      "28": [
-        22
-      ],
-      "29": [
-        23
-      ],
-      "31": [
-        24
-      ],
-      "33": [
-        25
-      ],
-      "35": [
-        26
-      ],
-      "36": [
-        27
+      "1": [
+        0
       ]
     },
     "science": {
-      "1": [
-        0
+      "36": [
+        34
       ],
-      "3": [
-        1
+      "35": [
+        33
       ],
-      "5": [
-        2
+      "34": [
+        32
       ],
-      "7": [
-        3
+      "33": [
+        31
       ],
-      "9": [
-        4
+      "31": [
+        30
       ],
-      "10": [
-        5
+      "30": [
+        29
       ],
-      "11": [
-        6,
-        7
+      "29": [
+        28
       ],
-      "12": [
-        8
+      "28": [
+        27
       ],
-      "13": [
-        9
+      "27": [
+        26
       ],
-      "15": [
-        10
-      ],
-      "16": [
-        11,
-        12
-      ],
-      "17": [
-        13
-      ],
-      "18": [
-        14
-      ],
-      "19": [
-        15
-      ],
-      "20": [
-        16
-      ],
-      "21": [
-        17
-      ],
-      "22": [
-        18,
-        19
-      ],
-      "23": [
-        20
-      ],
-      "24": [
-        21,
-        22
+      "26": [
+        25
       ],
       "25": [
         23,
         24
       ],
-      "26": [
-        25
+      "24": [
+        21,
+        22
       ],
-      "27": [
-        26
+      "23": [
+        20
       ],
-      "28": [
-        27
+      "22": [
+        18,
+        19
       ],
-      "29": [
-        28
+      "21": [
+        17
       ],
-      "30": [
-        29
+      "20": [
+        16
       ],
-      "31": [
-        30
+      "19": [
+        15
       ],
-      "33": [
-        31
+      "18": [
+        14
       ],
-      "34": [
-        32
+      "17": [
+        13
       ],
-      "35": [
-        33
+      "16": [
+        11,
+        12
       ],
-      "36": [
-        34
+      "15": [
+        10
+      ],
+      "13": [
+        9
+      ],
+      "12": [
+        8
+      ],
+      "11": [
+        6,
+        7
+      ],
+      "10": [
+        5
+      ],
+      "9": [
+        4
+      ],
+      "7": [
+        3
+      ],
+      "5": [
+        2
+      ],
+      "3": [
+        1
+      ],
+      "1": [
+        0
       ]
     }
   }
