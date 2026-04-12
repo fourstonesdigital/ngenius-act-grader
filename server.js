@@ -86,7 +86,6 @@ Return ONLY valid JSON with this exact structure:
 
 Each answer array must have exactly the number of answers shown above, in order Q1, Q2, Q3... Use "?" for any bubble you cannot clearly read. Return ONLY the JSON object, no explanation.`;
 
-    const isPDF = mimeType === 'application/pdf';
     const mediaBlock = isPDF
       ? { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: imageBase64 } }
       : { type: 'image', source: { type: 'base64', media_type: mimeType, data: imageBase64 } };
