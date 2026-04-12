@@ -152,10 +152,19 @@
     </div>
 
     <!-- Composite Score Hero -->
-    <div class="bg-gradient-to-br from-[#1d4ed8] to-blue-600 rounded-2xl p-8 text-white text-center shadow-lg">
-      <p class="text-blue-200 text-sm font-medium uppercase tracking-wider mb-1">ACT Composite Score</p>
-      <p id="compositeScore" class="text-7xl font-black leading-none my-2">—</p>
-      <p class="text-blue-200 text-sm">out of 36</p>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="bg-gradient-to-br from-[#1d4ed8] to-blue-600 rounded-2xl p-8 text-white text-center shadow-lg">
+        <p class="text-blue-200 text-sm font-medium uppercase tracking-wider mb-1">ACT Composite Score</p>
+        <p class="text-blue-100 text-xs mb-1">(English + Math + Reading)</p>
+        <p id="compositeScore" class="text-7xl font-black leading-none my-2">—</p>
+        <p class="text-blue-200 text-sm">out of 36</p>
+      </div>
+      <div class="bg-gradient-to-br from-emerald-600 to-teal-600 rounded-2xl p-8 text-white text-center shadow-lg">
+        <p class="text-emerald-200 text-sm font-medium uppercase tracking-wider mb-1">STEM Composite Score</p>
+        <p class="text-emerald-100 text-xs mb-1">(English + Math + Reading + Science)</p>
+        <p id="stemScore" class="text-7xl font-black leading-none my-2">—</p>
+        <p class="text-emerald-200 text-sm">out of 36</p>
+      </div>
     </div>
 
     <!-- Section Score Cards -->
@@ -476,9 +485,13 @@ function renderResults(extracted) {
   gradingResults.sectionResults = sectionResults;
   gradingResults.extracted = extracted;
 
-  // Composite
-  const scores = sections.map(s => sectionResults[s].scaleScore);
-  const composite = Math.round(scores.reduce((a,b) => a+b, 0) / 4);
+  // Composite: English + Math + Reading only (3 sections)
+  const coreScores = ['english','math','reading'].map(s => sectionResults[s].scaleScore);
+  const composite = Math.round(coreScores.reduce((a,b) => a+b, 0) / 3);
+
+  // STEM Composite: all 4 sections
+  const allScores = sections.map(s => sectionResults[s].scaleScore);
+  const stemComposite = Math.round(allScores.reduce((a,b) => a+b, 0) / 4);
 
   // ── Student Banner ──
   document.getElementById('r_name').textContent = extracted.studentName || '';
@@ -492,6 +505,7 @@ function renderResults(extracted) {
 
   // ── Composite ──
   document.getElementById('compositeScore').textContent = composite;
+  document.getElementById('stemScore').textContent = stemComposite;
 
   // ── Section Cards ──
   const cardMap = { english: 'Eng', math: 'Math', reading: 'Read', science: 'Sci' };
@@ -619,7 +633,28 @@ function exportCSV() {
   const { extracted, sectionResults } = gradingResults;
   const td = currentTestData;
   const sections = ['english', 'math', 'reading', 'science'];
-  const rows = [['Student', 'Test', 'Section', 'Question', 'Answered', 'Correct', 'IsCorrect', 'IsField', 'Category']];
+
+  // Summary rows first
+  const coreScores = ['english','math','reading'].map(s => sectionResults[s].scaleScore);
+  const composite = Math.round(coreScores.reduce((a,b) => a+b, 0) / 3);
+  const allScores = sections.map(s => sectionResults[s].scaleScore);
+  const stemComposite = Math.round(allScores.reduce((a,b) => a+b, 0) / 4);
+
+  const rows = [
+    ['Student', 'Test', 'English', 'Math', 'Reading', 'Science', 'Composite (ENG+MATH+READ)', 'STEM Composite (all 4)'],
+    [
+      extracted.studentName || '',
+      td.testName,
+      sectionResults.english.scaleScore,
+      sectionResults.math.scaleScore,
+      sectionResults.reading.scaleScore,
+      sectionResults.science.scaleScore,
+      composite,
+      stemComposite
+    ],
+    [],
+    ['Student', 'Test', 'Section', 'Question', 'Answered', 'Correct', 'IsCorrect', 'IsField', 'Category']
+  ];
 
   for (const sec of sections) {
     for (const q of td.sections[sec].questions) {
