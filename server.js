@@ -59,13 +59,16 @@ app.post('/api/grade', async (req, res) => {
     const sections = testData.sections;
     const prompt = `You are grading an nGenius Prep ACT bubble sheet. Extract the student information and all bubble answers.
 
-IMPORTANT: This is a custom nGenius answer sheet. ALL answer choices use A, B, C, D only (never F, G, H, J). Math questions may also have E as a 5th choice. Do NOT use F/G/H/J under any circumstances.
+IMPORTANT — Answer choice format: This sheet uses the standard ACT alternating format:
+- ODD-numbered questions (1, 3, 5, ...): choices are A, B, C, D
+- EVEN-numbered questions (2, 4, 6, ...): choices are F, G, H, J
+- Math questions 41-45 are odd-numbered so use A, B, C, D
 
 This test has:
-- English: ${sections.english.totalQuestions} questions (Q1-Q${sections.english.totalQuestions}) — each question has choices A, B, C, D
-- Math: ${sections.math.totalQuestions} questions (Q1-Q${sections.math.totalQuestions}) — each question has choices A, B, C, D, E
-- Reading: ${sections.reading.totalQuestions} questions (Q1-Q${sections.reading.totalQuestions}) — each question has choices A, B, C, D
-- Science: ${sections.science.totalQuestions} questions (Q1-Q${sections.science.totalQuestions}) — each question has choices A, B, C, D
+- English: ${sections.english.totalQuestions} questions (Q1-Q${sections.english.totalQuestions})
+- Math: ${sections.math.totalQuestions} questions (Q1-Q${sections.math.totalQuestions})
+- Reading: ${sections.reading.totalQuestions} questions (Q1-Q${sections.reading.totalQuestions})
+- Science: ${sections.science.totalQuestions} questions (Q1-Q${sections.science.totalQuestions})
 
 Return ONLY valid JSON with this exact structure:
 {
@@ -75,13 +78,13 @@ Return ONLY valid JSON with this exact structure:
   "testDate": "...",
   "studentEmail": "...",
   "parentEmail": "...",
-  "english": ["A","B",...],
-  "math": ["A","B",...],
-  "reading": ["A","B",...],
-  "science": ["A","B",...]
+  "english": ["A","G","B","F",...],
+  "math": ["A","G","B","F",...],
+  "reading": ["A","G","B","F",...],
+  "science": ["A","G","B","F",...]
 }
 
-Each answer array must have exactly the number of answers shown above. Use "?" for any bubble you cannot clearly read. Return ONLY the JSON object, no explanation.`;
+Each answer array must have exactly the number of answers shown above, in order Q1, Q2, Q3... Use "?" for any bubble you cannot clearly read. Return ONLY the JSON object, no explanation.`;
 
     const response = await anthropic.messages.create({
       model: 'claude-opus-4-5',
