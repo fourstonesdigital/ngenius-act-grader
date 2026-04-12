@@ -1,8 +1,10 @@
 import express from 'express';
 import Anthropic from '@anthropic-ai/sdk';
-import { readFileSync, readdirSync } from 'fs';
+import { readFileSync, readdirSync, writeFileSync, unlinkSync, mkdtempSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { execSync } from 'child_process';
+import { tmpdir } from 'os';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -58,7 +60,34 @@ app.post('/api/grade', async (req, res) => {
 
     const sections = testData.sections;
     const isPDF = mimeType === 'application/pdf';
-    const prompt = `You are grading an nGenius Prep ACT bubble sheet.${isPDF ? ' This is a PDF — read the FIRST PAGE ONLY and ignore any additional pages.' : ''} Extract the student information and all bubble answers.
+
+    // If PDF, convert page 1 to PNG using pdftoppm (poppler) for accurate vision
+    let finalBase64 = imageBase64;
+    let finalMime = mimeType;
+    let tmpDir = null;
+    if (isPDF) {
+      try {
+        tmpDir = mkdtempSync(join(tmpdir(), 'ngenius-'));
+        const pdfPath = join(tmpDir, 'sheet.pdf');
+        const outPrefix = join(tmpDir, 'page');
+        writeFileSync(pdfPath, Buffer.from(imageBase64, 'base64'));
+        // Convert first page only at 200dpi to PNG
+        execSync(`pdftoppm -png -r 200 -f 1 -l 1 "${pdfPath}" "${outPrefix}"`);
+        // pdftoppm outputs page-1.png or page-01.png
+        const files = readdirSync(tmpDir).filter(f => f.startsWith('page') && f.endsWith('.png'));
+        if (files.length > 0) {
+          finalBase64 = readFileSync(join(tmpDir, files[0])).toString('base64');
+          finalMime = 'image/png';
+          console.log('PDF converted to PNG successfully');
+        }
+      } catch (e) {
+        console.error('pdftoppm conversion failed, falling back to document mode:', e.message);
+      } finally {
+        if (tmpDir) try { execSync(`rm -rf "${tmpDir}"`); } catch {}
+      }
+    }
+
+    const prompt = `You are grading an nGenius Prep ACT bubble sheet. Extract the student information and all bubble answers.
 
 IMPORTANT — Answer choice format: This sheet uses the standard ACT alternating format:
 - ODD-numbered questions (1, 3, 5, ...): choices are A, B, C, D
@@ -86,9 +115,8 @@ Return ONLY valid JSON with this exact structure:
 
 Each answer array must have exactly the number of answers shown above, in order Q1, Q2, Q3... Use "?" for any bubble you cannot clearly read. Return ONLY the JSON object, no explanation.`;
 
-    const mediaBlock = isPDF
-      ? { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: imageBase64 } }
-      : { type: 'image', source: { type: 'base64', media_type: mimeType, data: imageBase64 } };
+    // Always send as image (PDF was converted to PNG above)
+    const mediaBlock = { type: 'image', source: { type: 'base64', media_type: finalMime, data: finalBase64 } };
 
     const response = await anthropic.messages.create({
       model: 'claude-opus-4-5',

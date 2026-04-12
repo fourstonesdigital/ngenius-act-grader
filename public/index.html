@@ -205,9 +205,15 @@
       <div id="fieldTable"></div>
     </div>
 
-    <!-- Missed Questions -->
+    <!-- All Answers -->
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-      <h2 class="text-base font-bold text-gray-900 mb-4">Missed Questions</h2>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-base font-bold text-gray-900">Answer Review</h2>
+        <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+          <input type="checkbox" id="showAllAnswers" checked onchange="toggleAnswerView()" class="rounded">
+          Show all answers
+        </label>
+      </div>
       <div id="missedTable"></div>
     </div>
 
@@ -451,6 +457,7 @@ function getScaleScore(raw, invTable, maxRaw) {
 
 function gradeSection(studentAnswers, questions, scaleInv) {
   let rawCorrect = 0;
+  const allAnswers = [];
   const missed = [];
   const fieldResults = [];
   const catStats = {}; // cat → { correct, total }
@@ -458,13 +465,15 @@ function gradeSection(studentAnswers, questions, scaleInv) {
   for (const q of questions) {
     const studentAns = (studentAnswers[q.number - 1] || '?').toUpperCase();
     const correct = q.answer.toUpperCase();
+    const isCorrect = studentAns === correct;
     if (q.field) {
-      fieldResults.push({ number: q.number, studentAns, correct, isCorrect: studentAns === correct });
+      fieldResults.push({ number: q.number, studentAns, correct, isCorrect });
     } else {
       const cat = q.category;
       if (!catStats[cat]) catStats[cat] = { correct: 0, total: 0 };
       catStats[cat].total++;
-      if (studentAns === correct) {
+      allAnswers.push({ number: q.number, studentAns, correct, isCorrect, category: cat });
+      if (isCorrect) {
         rawCorrect++;
         catStats[cat].correct++;
       } else {
@@ -474,7 +483,7 @@ function gradeSection(studentAnswers, questions, scaleInv) {
   }
 
   const scaleScore = getScaleScore(rawCorrect, scaleInv, questions.filter(q => !q.field).length);
-  return { rawCorrect, scaleScore, missed, fieldResults, catStats };
+  return { rawCorrect, scaleScore, allAnswers, missed, fieldResults, catStats };
 }
 
 function renderResults(extracted) {
@@ -579,34 +588,60 @@ function renderResults(extracted) {
     <tbody>${fieldRows || '<tr><td colspan="5" class="py-4 text-center text-gray-400 text-xs">No field questions</td></tr>'}</tbody>
   </table>`;
 
-  // ── Missed Questions ──
+  // ── Answer Review Table ──
+  gradingResults.allAnswerRows = {};
   const missedEl = document.getElementById('missedTable');
-  let totalMissed = 0;
-  let allMissedRows = '';
   for (const sec of sections) {
-    for (const m of sectionResults[sec].missed) {
-      totalMissed++;
-      allMissedRows += `<tr class="border-b border-gray-100 text-sm">
-        <td class="py-2 px-3 text-gray-500">${sectionLabels[sec]}</td>
-        <td class="py-2 px-3 font-medium">Q${m.number}</td>
-        <td class="py-2 px-3 text-red-600 font-bold">${m.studentAns}</td>
-        <td class="py-2 px-3 text-green-700 font-bold">${m.correct}</td>
-        <td class="py-2 px-3 text-xs text-gray-500">${m.category}</td>
+    gradingResults.allAnswerRows[sec] = sectionResults[sec].allAnswers;
+  }
+  renderAnswerTable(true);
+
+function renderAnswerTable(showAll) {
+  const missedEl = document.getElementById('missedTable');
+  const sectionLabelsLocal = { english: 'English', math: 'Math', reading: 'Reading', science: 'Science' };
+  const sectionsLocal = ['english','math','reading','science'];
+  let rows = '';
+  let count = 0;
+  for (const sec of sectionsLocal) {
+    const answers = gradingResults.allAnswerRows[sec] || [];
+    for (const a of answers) {
+      if (!showAll && a.isCorrect) continue;
+      count++;
+      const rowClass = a.isCorrect ? 'border-b border-gray-100 text-sm' : 'border-b border-red-100 text-sm bg-red-50';
+      const studentCell = a.isCorrect
+        ? `<td class="py-2 px-3 text-green-700 font-bold">${a.studentAns}</td>`
+        : `<td class="py-2 px-3 text-red-600 font-bold">${a.studentAns}</td>`;
+      rows += `<tr class="${rowClass}">
+        <td class="py-2 px-3 text-gray-500">${sectionLabelsLocal[sec]}</td>
+        <td class="py-2 px-3 font-medium">Q${a.number}</td>
+        ${studentCell}
+        <td class="py-2 px-3 text-gray-800 font-bold">${a.correct}</td>
+        <td class="py-2 px-3 text-center">${a.isCorrect ? '✅' : '❌'}</td>
+        <td class="py-2 px-3 text-xs text-gray-500">${a.category}</td>
       </tr>`;
     }
   }
-  missedEl.innerHTML = totalMissed === 0
-    ? '<p class="text-green-600 font-semibold text-sm">🎉 Perfect score! No missed questions.</p>'
-    : `<table class="w-full text-sm">
-        <thead><tr class="bg-gray-50 text-xs font-semibold text-gray-500 uppercase">
-          <th class="py-2 px-3 text-left">Section</th>
-          <th class="py-2 px-3 text-left">Question</th>
-          <th class="py-2 px-3 text-left">Answered</th>
-          <th class="py-2 px-3 text-left">Correct</th>
-          <th class="py-2 px-3 text-left">Category</th>
-        </tr></thead>
-        <tbody>${allMissedRows}</tbody>
-      </table>`;
+  if (count === 0 && !showAll) {
+    missedEl.innerHTML = '<p class="text-green-600 font-semibold text-sm">🎉 Perfect score on scored questions!</p>';
+    return;
+  }
+  missedEl.innerHTML = `<table class="w-full text-sm">
+    <thead><tr class="bg-gray-50 text-xs font-semibold text-gray-500 uppercase">
+      <th class="py-2 px-3 text-left">Section</th>
+      <th class="py-2 px-3 text-left">Question</th>
+      <th class="py-2 px-3 text-left">Student</th>
+      <th class="py-2 px-3 text-left">Correct</th>
+      <th class="py-2 px-3 text-left">✔</th>
+      <th class="py-2 px-3 text-left">Category</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+function toggleAnswerView() {
+  const showAll = document.getElementById('showAllAnswers').checked;
+  renderAnswerTable(showAll);
+}
 
   // ── Recommendations ──
   const recsList = document.getElementById('recsList');
