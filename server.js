@@ -23,6 +23,25 @@ function loadTest(testId) {
   return null;
 }
 
+// Diagnostic endpoint
+app.get('/api/diag', (req, res) => {
+  const r1 = spawnSync('which', ['python3']);
+  const r2 = spawnSync('python3', ['--version']);
+  const r3 = spawnSync('python3', ['-c', 'import sys; print(sys.path)']);
+  const r4 = spawnSync('python3', ['-c', 'import cv2; print(cv2.__version__)'], {
+    env: { ...process.env, PATH: process.env.PATH + ':/nix/var/nix/profiles/default/bin:/root/.nix-profile/bin' },
+  });
+  const r5 = spawnSync('find', ['/nix', '-name', 'cv2*', '-maxdepth', '8']);
+  res.json({
+    which_python3: r1.stdout?.toString().trim(),
+    python_version: r2.stdout?.toString().trim(),
+    sys_path: r3.stdout?.toString().trim(),
+    cv2_test: r4.stdout?.toString().trim() || r4.stderr?.toString().trim(),
+    nix_cv2: r5.stdout?.toString().trim().split('\n').slice(0,5),
+    PATH: process.env.PATH,
+  });
+});
+
 // List tests
 app.get('/api/tests', (req, res) => {
   const testsDir = join(__dirname, 'tests');
