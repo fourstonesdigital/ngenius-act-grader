@@ -28,8 +28,9 @@ app.get('/api/diag', (req, res) => {
   const r1 = spawnSync('which', ['python3']);
   const r2 = spawnSync('python3', ['--version']);
   const r3 = spawnSync('python3', ['-c', 'import sys; print(sys.path)']);
-  const r4 = spawnSync('python3', ['-c', 'import cv2; print(cv2.__version__)'], {
-    env: { ...process.env, PATH: process.env.PATH + ':/nix/var/nix/profiles/default/bin:/root/.nix-profile/bin' },
+  const nixSP2 = '/nix/var/nix/profiles/default/lib/python3.12/site-packages';
+  const r4 = spawnSync('python3', ['-c', 'import cv2, numpy; print("cv2:", cv2.__version__, "numpy:", numpy.__version__)'], {
+    env: { ...process.env, PYTHONPATH: [process.env.PYTHONPATH, nixSP2].filter(Boolean).join(':') },
   });
   const r5 = spawnSync('find', ['/nix', '-name', 'cv2*', '-maxdepth', '8']);
   res.json({
@@ -93,10 +94,16 @@ app.post('/api/grade', async (req, res) => {
     const gridPath = join(__dirname, 'public/bubble-grid-v2.json');
     const scriptPath = join(__dirname, 'omr_detect.py');
     const pythonPath = process.env.PYTHON_PATH || 'python3';
+    // Set PYTHONPATH so nix-installed cv2/numpy are found by python3
+    const nixSitePackages = '/nix/var/nix/profiles/default/lib/python3.12/site-packages';
+    const pythonEnv = {
+      ...process.env,
+      PYTHONPATH: [process.env.PYTHONPATH, nixSitePackages].filter(Boolean).join(':'),
+    };
     const result = spawnSync(pythonPath, [scriptPath, inputPath, '--grid', gridPath], {
       timeout: 30000,
       maxBuffer: 1024 * 1024,
-      env: { ...process.env, PATH: process.env.PATH + ':/nix/var/nix/profiles/default/bin' },
+      env: pythonEnv,
     });
 
     if (result.error) throw result.error;
@@ -131,8 +138,9 @@ app.post('/api/grade', async (req, res) => {
 app.listen(port, () => {
   console.log(`nGenius Grader v2.1 (Hybrid OMR) running on port ${port}`);
   // Verify Python + OMR deps at startup
+  const nixSP = '/nix/var/nix/profiles/default/lib/python3.12/site-packages';
   const check = spawnSync('python3', ['-c', 'import cv2, numpy; print("OMR deps OK cv2="+cv2.__version__)'], {
-    env: { ...process.env, PATH: process.env.PATH + ':/nix/var/nix/profiles/default/bin' },
+    env: { ...process.env, PYTHONPATH: [process.env.PYTHONPATH, nixSP].filter(Boolean).join(':') },
   });
   if (check.error) {
     console.error('Python check failed:', check.error.message);
