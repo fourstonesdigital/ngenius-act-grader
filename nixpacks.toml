@@ -1,2 +1,8 @@
 [phases.setup]
 nixPkgs = ["nodejs_22", "poppler_utils", "imagemagick", "python3", "python3Packages.opencv4", "python3Packages.numpy"]
+
+[phases.install]
+cmds = ["npm ci --production"]
+
+[start]
+cmd = "node server.js"

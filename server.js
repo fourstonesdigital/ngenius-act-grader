@@ -70,11 +70,14 @@ app.post('/api/grade', async (req, res) => {
     writeFileSync(inputPath, Buffer.from(imageBase64, 'base64'));
 
     // Run Python OMR detector (hybrid HoughCircles + template grid)
+    // Use PATH from environment so nix-installed python3 is found correctly
     const gridPath = join(__dirname, 'public/bubble-grid-v2.json');
     const scriptPath = join(__dirname, 'omr_detect.py');
-    const result = spawnSync('python3', [scriptPath, inputPath, '--grid', gridPath], {
+    const pythonPath = process.env.PYTHON_PATH || 'python3';
+    const result = spawnSync(pythonPath, [scriptPath, inputPath, '--grid', gridPath], {
       timeout: 30000,
       maxBuffer: 1024 * 1024,
+      env: { ...process.env, PATH: process.env.PATH + ':/nix/var/nix/profiles/default/bin' },
     });
 
     if (result.error) throw result.error;
@@ -106,4 +109,15 @@ app.post('/api/grade', async (req, res) => {
   }
 });
 
-app.listen(port, () => console.log(`nGenius Grader v2.1 (Hybrid OMR) running on port ${port}`));
+app.listen(port, () => {
+  console.log(`nGenius Grader v2.1 (Hybrid OMR) running on port ${port}`);
+  // Verify Python + OMR deps at startup
+  const check = spawnSync('python3', ['-c', 'import cv2, numpy; print("OMR deps OK cv2="+cv2.__version__)'], {
+    env: { ...process.env, PATH: process.env.PATH + ':/nix/var/nix/profiles/default/bin' },
+  });
+  if (check.error) {
+    console.error('Python check failed:', check.error.message);
+  } else {
+    console.log('Python check:', check.stdout?.toString().trim() || check.stderr?.toString().trim());
+  }
+});
