@@ -62,7 +62,7 @@ app.post('/api/grade', async (req, res) => {
   const testData = loadTest(testId);
   if (!testData) return res.status(404).json({ error: 'Test not found' });
 
-  const grid = JSON.parse(readFileSync(join(__dirname, 'public/bubble-grid.json'), 'utf8'));
+  const grid = JSON.parse(readFileSync(join(__dirname, 'public/bubble-grid-v2.json'), 'utf8'));
 
   let tmpDir = null;
   try {
@@ -88,4 +88,4 @@ app.post('/api/grade', async (req, res) => {
   }
 });
 
-app.listen(port, () => console.log(`nGenius Grader v1.6 (OMR) running on port ${port}`));
+app.listen(port, () => console.log(`nGenius Grader v2.0 (OMR) running on port ${port}`));
