@@ -69,6 +69,29 @@
 
     <!-- UPLOAD TAB -->
     <div id="panelUpload" class="p-6">
+      <!-- Student Info -->
+      <div class="grid grid-cols-2 gap-4 mb-6">
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Student Name</label>
+          <input id="u_name" type="text" placeholder="e.g. Jane Smith" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Test Date</label>
+          <input id="u_date" type="date" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Tutor</label>
+          <input id="u_tutor" type="text" placeholder="Tutor name" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Student Email</label>
+          <input id="u_email" type="email" placeholder="student@email.com" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+        </div>
+        <div class="col-span-2">
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Parent Email</label>
+          <input id="u_pemail" type="email" placeholder="parent@email.com" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+        </div>
+      </div>
       <div id="dropZone"
            class="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center cursor-pointer transition-all"
            onclick="document.getElementById('fileInput').click()"
@@ -200,10 +223,35 @@
       </div>
     </div>
 
+    <!-- Top Export Buttons -->
+    <div class="flex gap-3 no-print">
+      <button id="exportTopPDF" onclick="exportPDF()" class="flex-1 bg-gray-900 hover:bg-gray-700 text-white font-semibold py-3 px-5 rounded-lg text-sm transition-colors">
+        🖨️ Print / Save PDF
+      </button>
+      <button id="exportTopCSV" onclick="exportCSV()" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-5 rounded-lg text-sm transition-colors">
+        📊 Export CSV
+      </button>
+      <button onclick="emailResults()" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-5 rounded-lg text-sm transition-colors">
+        ✉️ Email Results
+      </button>
+    </div>
+
     <!-- Category Performance -->
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
       <h2 class="text-base font-bold text-gray-900 mb-4">Category Performance</h2>
       <div id="catBars" class="space-y-3"></div>
+    </div>
+
+    <!-- All Answers -->
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-base font-bold text-gray-900">Answer Review</h2>
+        <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+          <input type="checkbox" id="showAllAnswers" onchange="toggleAnswerView()" class="rounded">
+          Show all answers
+        </label>
+      </div>
+      <div id="missedTable"></div>
     </div>
 
     <!-- Field Questions -->
@@ -212,18 +260,6 @@
       <p class="text-xs text-gray-500 mb-2">Embedded research questions used by ACT to evaluate future test items. Do not affect the score.</p>
       <div id="fieldSummaryBars" class="flex flex-wrap gap-3 mb-4"></div>
       <div id="fieldTable"></div>
-    </div>
-
-    <!-- All Answers -->
-    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-base font-bold text-gray-900">Answer Review</h2>
-        <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
-          <input type="checkbox" id="showAllAnswers" checked onchange="toggleAnswerView()" class="rounded">
-          Show all answers
-        </label>
-      </div>
-      <div id="missedTable"></div>
     </div>
 
     <!-- Study Recommendations -->
@@ -240,6 +276,9 @@
       </button>
       <button onclick="exportCSV()" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-5 rounded-lg text-sm transition-colors">
         📊 Export CSV
+      </button>
+      <button onclick="emailResults()" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-5 rounded-lg text-sm transition-colors">
+        ✉️ Email Results
       </button>
     </div>
 
@@ -357,13 +396,28 @@ async function gradeImage() {
     const resp = await fetch('/api/grade', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ imageBase64: base64, mimeType: selectedFileMime, testId: currentTestId })
+      body: JSON.stringify({
+        imageBase64: base64,
+        mimeType: selectedFileMime,
+        testId: currentTestId,
+        studentName: document.getElementById('u_name').value || '',
+        testDate: document.getElementById('u_date').value || '',
+        tutor: document.getElementById('u_tutor').value || '',
+        studentEmail: document.getElementById('u_email').value || '',
+        parentEmail: document.getElementById('u_pemail').value || ''
+      })
     });
     if (!resp.ok) {
       const err = await resp.json();
       throw new Error(err.error || 'Server error');
     }
     const extracted = await resp.json();
+    // Merge upload tab student info into extracted (override if server didn't return them)
+    if (!extracted.studentName) extracted.studentName = document.getElementById('u_name').value || '';
+    if (!extracted.testDate)    extracted.testDate    = document.getElementById('u_date').value || '';
+    if (!extracted.tutor)       extracted.tutor       = document.getElementById('u_tutor').value || '';
+    if (!extracted.studentEmail) extracted.studentEmail = document.getElementById('u_email').value || '';
+    if (!extracted.parentEmail)  extracted.parentEmail  = document.getElementById('u_pemail').value || '';
     renderResults(extracted);
   } catch(e) {
     showError('Grading failed: ' + e.message);
@@ -622,7 +676,7 @@ function renderResults(extracted) {
   for (const sec of sections) {
     gradingResults.allAnswerRows[sec] = sectionResults[sec].allAnswers;
   }
-  renderAnswerTable(true);
+  renderAnswerTable(false);
 
 function renderAnswerTable(showAll) {
   const missedEl = document.getElementById('missedTable');
@@ -702,6 +756,11 @@ function toggleAnswerView() {
 // EXPORTS
 // ═══════════════════════════════════════════════════════════
 function exportPDF() { window.print(); }
+
+function emailResults() {
+  // TODO: implement email sending
+  alert('Email feature coming soon!');
+}
 
 function exportCSV() {
   if (!gradingResults) return;
