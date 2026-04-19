@@ -1,2 +1,2 @@
 [phases.setup]
-nixPkgs = ["nodejs_22", "poppler_utils", "imagemagick"]
+nixPkgs = ["nodejs_22", "poppler_utils", "imagemagick", "python3", "python3Packages.opencv4", "python3Packages.numpy"]

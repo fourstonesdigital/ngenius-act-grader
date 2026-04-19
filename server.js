@@ -3,9 +3,8 @@ import Anthropic from '@anthropic-ai/sdk';
 import { readFileSync, readdirSync, writeFileSync, mkdtempSync, rmSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { execSync } from 'child_process';
+import { execSync, spawnSync } from 'child_process';
 import { tmpdir } from 'os';
-import { detectAnswers } from './omr.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -62,18 +61,37 @@ app.post('/api/grade', async (req, res) => {
   const testData = loadTest(testId);
   if (!testData) return res.status(404).json({ error: 'Test not found' });
 
-  const grid = JSON.parse(readFileSync(join(__dirname, 'public/bubble-grid-v2.json'), 'utf8'));
-
   let tmpDir = null;
   try {
     tmpDir = mkdtempSync(join(tmpdir(), 'ngenius-'));
     const isPDF = mimeType === 'application/pdf';
-    const ext = isPDF ? 'pdf' : 'png';
+    const ext = isPDF ? 'pdf' : (mimeType === 'image/jpeg' ? 'jpg' : 'png');
     const inputPath = join(tmpDir, `input.${ext}`);
     writeFileSync(inputPath, Buffer.from(imageBase64, 'base64'));
 
-    // Run OMR pixel-based detection
-    const answers = await detectAnswers(inputPath, grid);
+    // Run Python OMR detector (hybrid HoughCircles + template grid)
+    const gridPath = join(__dirname, 'public/bubble-grid-v2.json');
+    const scriptPath = join(__dirname, 'omr_detect.py');
+    const result = spawnSync('python3', [scriptPath, inputPath, '--grid', gridPath], {
+      timeout: 30000,
+      maxBuffer: 1024 * 1024,
+    });
+
+    if (result.error) throw result.error;
+    if (result.status !== 0) {
+      const stderr = result.stderr?.toString() || '';
+      throw new Error(`OMR failed: ${stderr.slice(0, 500)}`);
+    }
+
+    const omrOut = JSON.parse(result.stdout.toString().trim());
+    if (omrOut.error) throw new Error(omrOut.error);
+
+    const answers = {
+      english: omrOut.english || [],
+      math:    omrOut.math    || [],
+      reading: omrOut.reading || [],
+      science: omrOut.science || [],
+    };
 
     // Extract header info with Claude (just name/date/test# — small cheap call)
     const headerInfo = await extractHeader(imageBase64, mimeType);
@@ -88,4 +106,4 @@ app.post('/api/grade', async (req, res) => {
   }
 });
 
-app.listen(port, () => console.log(`nGenius Grader v2.0 (OMR) running on port ${port}`));
+app.listen(port, () => console.log(`nGenius Grader v2.1 (Hybrid OMR) running on port ${port}`));
