@@ -1,268 +1,350 @@
 <!DOCTYPE html>
-<!-- v2026.05.10.1 -->
+<!-- v2026.05.10.2 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>nGenius Prep — ACT Score Report</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&display=swap" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-    body { font-family: 'Inter', sans-serif; }
-    .drag-over { border-color: #1d4ed8 !important; background-color: #eff6ff !important; }
+    body { font-family: 'DM Sans', 'Inter', -apple-system, sans-serif; }
+    .drag-over { border-color: #2F3D4C !important; background-color: #f0f2f4 !important; }
     @media print {
       .no-print { display: none !important; }
       #results { display: block !important; }
       body { background: white; }
     }
-    .answer-cell input { text-transform: uppercase; caret-color: #1d4ed8; }
-    .spinner { animation: spin 1s linear infinite; }
-    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-    .tab-active { border-bottom: 3px solid #1d4ed8; color: #1d4ed8; font-weight: 600; }
-    .tab-inactive { border-bottom: 3px solid transparent; color: #6b7280; }
-    .tab-inactive:hover { color: #1d4ed8; }
+    .answer-cell input { text-transform: uppercase; }
+    .tab-active { border-bottom: 2px solid #2F3D4C; color: #2F3D4C; font-weight: 600; }
+    .tab-inactive { border-bottom: 2px solid transparent; color: #6b7280; }
+    .tab-inactive:hover { color: #2F3D4C; }
+    @keyframes shimmer {
+      0% { background-position: -700px 0; }
+      100% { background-position: 700px 0; }
+    }
+    .skeleton {
+      background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+      background-size: 700px 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 8px;
+    }
+    input:focus, select:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px #2F3D4C;
+      border-color: #2F3D4C;
+    }
   </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-[#F5F6F7] min-h-screen text-[#1a1a1a]">
 
 <!-- ── HEADER ── -->
-<header class="bg-white shadow-sm border-b border-gray-200 no-print">
-  <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+<header class="bg-[#2F3D4C] no-print">
+  <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
     <div class="flex items-center gap-3">
-      <div class="w-9 h-9 bg-[#1d4ed8] rounded-lg flex items-center justify-center">
-        <span class="text-white font-black text-sm">nG</span>
+      <div class="w-8 h-8 bg-[#D7190B] rounded flex items-center justify-center flex-shrink-0">
+        <span class="text-white font-black text-xs tracking-tight">nG</span>
       </div>
-      <div>
-        <span class="text-xl font-bold text-gray-900">nGenius Prep</span>
-        <span class="ml-2 text-sm text-gray-500">ACT Score Report</span>
-        <span class="ml-2 text-xs text-gray-400 font-mono">v2.2</span>
+      <div class="flex items-baseline gap-2">
+        <span class="text-white font-bold text-base">nGenius Prep</span>
+        <span class="text-slate-400 text-sm">ACT Score Report</span>
       </div>
     </div>
-    <div class="flex items-center gap-3">
-      <a href="/answer-sheet.pdf" target="_blank" class="text-xs text-[#1d4ed8] hover:underline font-medium">📄 Download Answer Sheet</a>
-      <span id="testBadge" class="hidden bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full"></span>
+    <div class="flex items-center gap-4">
+      <a href="/answer-sheet.pdf" target="_blank"
+         class="text-xs text-slate-300 hover:text-white transition-colors font-medium">
+        ↓ Answer Sheet
+      </a>
+      <span id="testBadge"
+            class="hidden bg-white/10 text-slate-200 text-xs font-semibold px-2.5 py-1 rounded">
+      </span>
     </div>
   </div>
 </header>
 
 <!-- ── MAIN ── -->
-<main class="max-w-5xl mx-auto px-4 py-8">
+<main class="max-w-5xl mx-auto px-4 py-6">
 
   <!-- Test Selector -->
-  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6 no-print">
-    <label class="block text-sm font-semibold text-gray-700 mb-2">Select Practice Test</label>
-    <select id="testSelect" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm">
+  <div class="bg-white rounded-lg border border-gray-200 p-4 mb-4 no-print">
+    <label class="block text-xs font-semibold text-[#4F4F4F] uppercase tracking-wide mb-1.5">
+      Practice Test
+    </label>
+    <select id="testSelect"
+            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-[#1a1a1a] bg-white">
       <option value="">Loading tests…</option>
     </select>
   </div>
 
-  <!-- Tabs -->
-  <div class="bg-white rounded-xl shadow-sm border border-gray-200 no-print" id="inputPanel">
-    <div class="flex border-b border-gray-200">
-      <button id="tabUpload" onclick="switchTab('upload')" class="px-6 py-4 text-sm tab-active">📷 Upload Scan</button>
-      <button id="tabManual" onclick="switchTab('manual')" class="px-6 py-4 text-sm tab-inactive">✏️ Manual Entry</button>
+  <!-- Input Panel -->
+  <div class="bg-white rounded-lg border border-gray-200 no-print" id="inputPanel">
+
+    <!-- Tabs -->
+    <div class="flex border-b border-gray-200 px-1">
+      <button id="tabUpload" onclick="switchTab('upload')"
+              class="px-5 py-3 text-sm tab-active">
+        Upload Scan
+      </button>
+      <button id="tabManual" onclick="switchTab('manual')"
+              class="px-5 py-3 text-sm tab-inactive">
+        Manual Entry
+      </button>
     </div>
 
     <!-- UPLOAD TAB -->
-    <div id="panelUpload" class="p-6">
-      <div class="grid grid-cols-2 gap-4 mb-6">
+    <div id="panelUpload" class="p-5">
+      <!-- Student Info -->
+      <div class="grid grid-cols-2 gap-3 mb-5">
         <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1">Student Name</label>
-          <input id="u_name" type="text" placeholder="e.g. Jane Smith" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+          <label class="block text-xs font-semibold text-[#4F4F4F] mb-1">Student Name</label>
+          <input id="u_name" type="text" placeholder="Jane Smith"
+                 class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" />
         </div>
         <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1">Test Date</label>
-          <input id="u_date" type="date" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+          <label class="block text-xs font-semibold text-[#4F4F4F] mb-1">Test Date</label>
+          <input id="u_date" type="date"
+                 class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" />
         </div>
         <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1">Tutor Email</label>
-          <input id="u_tutor" type="email" placeholder="tutor@ngeniusprep.com" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+          <label class="block text-xs font-semibold text-[#4F4F4F] mb-1">Tutor Email</label>
+          <input id="u_tutor" type="email" placeholder="tutor@ngeniusprep.com"
+                 class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" />
         </div>
         <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1">Student Email</label>
-          <input id="u_email" type="email" placeholder="student@email.com" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+          <label class="block text-xs font-semibold text-[#4F4F4F] mb-1">Student Email</label>
+          <input id="u_email" type="email" placeholder="student@email.com"
+                 class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" />
         </div>
         <div class="col-span-2">
-          <label class="block text-xs font-semibold text-gray-600 mb-1">Parent Email</label>
-          <input id="u_pemail" type="email" placeholder="parent@email.com" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+          <label class="block text-xs font-semibold text-[#4F4F4F] mb-1">Parent Email</label>
+          <input id="u_pemail" type="email" placeholder="parent@email.com"
+                 class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" />
         </div>
       </div>
+
+      <!-- Drop Zone -->
       <div id="dropZone"
-           class="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center cursor-pointer transition-all"
+           class="border-2 border-dashed border-gray-300 rounded-lg p-10 text-center cursor-pointer transition-colors hover:border-[#2F3D4C] hover:bg-[#F5F6F7]"
            onclick="document.getElementById('fileInput').click()"
            ondragover="handleDragOver(event)"
            ondragleave="handleDragLeave(event)"
            ondrop="handleDrop(event)">
-        <div class="text-4xl mb-3">📄</div>
-        <p class="text-gray-700 font-medium">Drag &amp; drop bubble sheet here</p>
-        <p class="text-gray-400 text-sm mt-1">or click to browse — JPG, PNG, PDF supported</p>
-        <input type="file" id="fileInput" accept="image/*,.pdf,application/pdf" class="hidden" onchange="handleFileSelect(event)" />
+        <p class="text-2xl mb-2">📄</p>
+        <p class="text-sm font-medium text-[#2F3D4C]">Drop bubble sheet here or click to browse</p>
+        <p class="text-xs text-gray-400 mt-1">JPG, PNG, or PDF</p>
+        <input type="file" id="fileInput" accept="image/*,.pdf,application/pdf"
+               class="hidden" onchange="handleFileSelect(event)" />
       </div>
-      <div id="imagePreview" class="hidden mt-4">
-        <img id="previewImg" class="max-h-48 rounded-lg border border-gray-200 mx-auto" />
-        <p id="imageName" class="text-center text-sm text-gray-500 mt-2"></p>
+
+      <div id="imagePreview" class="hidden mt-3 text-center">
+        <img id="previewImg" class="max-h-40 rounded border border-gray-200 mx-auto" />
+        <p id="imageName" class="text-xs text-gray-400 mt-1.5"></p>
       </div>
-      <button id="gradeBtn" onclick="gradeImage()"
-              class="hidden mt-4 w-full bg-[#1d4ed8] hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors">
+
+      <button id="gradeBtn" onclick="gradeImage()" class="hidden mt-4 w-full
+              bg-[#D7190B] hover:bg-[#b51508] text-white font-semibold py-2.5 px-5
+              rounded-md text-sm transition-colors">
         Grade This Test →
       </button>
     </div>
 
     <!-- MANUAL ENTRY TAB -->
-    <div id="panelManual" class="hidden p-6">
-      <div class="grid grid-cols-2 gap-4 mb-6">
+    <div id="panelManual" class="hidden p-5">
+      <div class="grid grid-cols-2 gap-3 mb-5">
         <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1">Student Name</label>
-          <input id="m_name" type="text" placeholder="e.g. Jane Smith" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+          <label class="block text-xs font-semibold text-[#4F4F4F] mb-1">Student Name</label>
+          <input id="m_name" type="text" placeholder="Jane Smith"
+                 class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" />
         </div>
         <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1">Test Date</label>
-          <input id="m_date" type="date" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+          <label class="block text-xs font-semibold text-[#4F4F4F] mb-1">Test Date</label>
+          <input id="m_date" type="date"
+                 class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" />
         </div>
         <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1">Tutor Email</label>
-          <input id="m_tutor" type="email" placeholder="tutor@ngeniusprep.com" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+          <label class="block text-xs font-semibold text-[#4F4F4F] mb-1">Tutor Email</label>
+          <input id="m_tutor" type="email" placeholder="tutor@ngeniusprep.com"
+                 class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" />
         </div>
         <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1">Student Email</label>
-          <input id="m_email" type="email" placeholder="student@email.com" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+          <label class="block text-xs font-semibold text-[#4F4F4F] mb-1">Student Email</label>
+          <input id="m_email" type="email" placeholder="student@email.com"
+                 class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" />
         </div>
         <div class="col-span-2">
-          <label class="block text-xs font-semibold text-gray-600 mb-1">Parent Email</label>
-          <input id="m_pemail" type="email" placeholder="parent@email.com" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+          <label class="block text-xs font-semibold text-[#4F4F4F] mb-1">Parent Email</label>
+          <input id="m_pemail" type="email" placeholder="parent@email.com"
+                 class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" />
         </div>
       </div>
-      <div id="manualGrids" class="space-y-6"></div>
-      <button onclick="gradeManual()"
-              class="mt-6 w-full bg-[#1d4ed8] hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors">
+      <div id="manualGrids" class="space-y-5"></div>
+      <button onclick="gradeManual()" class="mt-5 w-full
+              bg-[#D7190B] hover:bg-[#b51508] text-white font-semibold py-2.5 px-5
+              rounded-md text-sm transition-colors">
         Calculate Scores →
       </button>
     </div>
   </div>
 
-  <!-- Loading Spinner -->
-  <div id="loadingBar" class="hidden mt-8 flex flex-col items-center gap-4">
-    <svg class="spinner w-10 h-10 text-[#1d4ed8]" fill="none" viewBox="0 0 24 24">
-      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-    </svg>
-    <p class="text-gray-600 text-sm">Reading bubble sheet (OMR)… this may take 15–25 seconds.</p>
+  <!-- Skeleton Loader -->
+  <div id="loadingBar" class="hidden mt-5 space-y-4">
+    <div class="skeleton h-36 w-full"></div>
+    <div class="grid grid-cols-4 gap-3">
+      <div class="skeleton h-24"></div>
+      <div class="skeleton h-24"></div>
+      <div class="skeleton h-24"></div>
+      <div class="skeleton h-24"></div>
+    </div>
+    <div class="skeleton h-10 w-full"></div>
+    <div class="skeleton h-64 w-full"></div>
   </div>
 
   <!-- Error Banner -->
-  <div id="errorBar" class="hidden mt-6 bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm"></div>
+  <div id="errorBar"
+       class="hidden mt-4 bg-red-50 border border-[#D7190B]/30 rounded-lg p-3
+              text-[#D7190B] text-sm font-medium">
+  </div>
 
   <!-- ── RESULTS ── -->
-  <div id="results" class="hidden mt-8 space-y-6">
+  <div id="results" class="hidden mt-5 space-y-4">
 
     <!-- Print header -->
-    <div class="hidden print:block mb-6 text-center">
-      <h1 class="text-2xl font-bold text-gray-900">nGenius Prep — ACT Score Report</h1>
+    <div class="hidden print:block mb-4 text-center">
+      <h1 class="text-xl font-bold text-[#2F3D4C]">nGenius Prep — ACT Score Report</h1>
       <p id="printMeta" class="text-gray-500 mt-1 text-sm"></p>
     </div>
 
-    <!-- Student Info Banner -->
-    <div id="studentBanner" class="bg-blue-50 border border-blue-200 rounded-xl p-4 no-print">
-      <div class="flex flex-wrap gap-4 text-sm text-blue-900">
-        <span id="r_name" class="font-semibold"></span>
-        <span id="r_date"></span>
-        <span id="r_tutor"></span>
+    <!-- Student Info Bar -->
+    <div id="studentBanner"
+         class="bg-white rounded-lg border border-gray-200 px-4 py-3 no-print">
+      <div class="flex flex-wrap items-center gap-x-6 gap-y-1 text-sm">
+        <span id="r_name" class="font-semibold text-[#2F3D4C]"></span>
+        <span id="r_date" class="text-[#4F4F4F]"></span>
+        <span id="r_tutor" class="text-[#4F4F4F]"></span>
       </div>
     </div>
 
-    <!-- Composite Score Hero -->
+    <!-- Score Hero Row -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div class="bg-gradient-to-br from-[#1d4ed8] to-blue-600 rounded-2xl p-8 text-white text-center shadow-lg">
-        <p class="text-blue-200 text-sm font-medium uppercase tracking-wider mb-1">ACT Composite Score</p>
-        <p class="text-blue-100 text-xs mb-1">(English + Math + Reading)</p>
-        <p id="compositeScore" class="text-7xl font-black leading-none my-2">—</p>
-        <p class="text-blue-200 text-sm">out of 36</p>
+      <!-- ACT Composite -->
+      <div class="bg-[#2F3D4C] rounded-lg p-8 text-white text-center">
+        <p class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-1">
+          ACT Composite Score
+        </p>
+        <p class="text-slate-400 text-xs mb-3">English + Math + Reading</p>
+        <p id="compositeScore" class="text-8xl font-black leading-none">—</p>
+        <p class="text-slate-400 text-xs mt-3">out of 36</p>
       </div>
-      <div class="bg-gradient-to-br from-emerald-600 to-teal-600 rounded-2xl p-8 text-white text-center shadow-lg">
-        <p class="text-emerald-200 text-sm font-medium uppercase tracking-wider mb-1">STEM Score</p>
-        <p class="text-emerald-100 text-xs mb-1">(Math + Science)</p>
-        <p id="stemScore" class="text-7xl font-black leading-none my-2">—</p>
-        <p class="text-emerald-200 text-sm">out of 36</p>
+      <!-- STEM -->
+      <div class="bg-white rounded-lg border-2 border-[#2F3D4C] p-8 text-center">
+        <p class="text-xs font-semibold uppercase tracking-widest text-[#4F4F4F] mb-1">
+          STEM Score
+        </p>
+        <p class="text-gray-400 text-xs mb-3">Math + Science</p>
+        <p id="stemScore" class="text-8xl font-black leading-none text-[#2F3D4C]">—</p>
+        <p class="text-gray-400 text-xs mt-3">out of 36</p>
       </div>
     </div>
 
     <!-- Section Score Cards -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5 text-center">
-        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">English</p>
-        <p id="scoreEng" class="text-4xl font-black text-[#1d4ed8]">—</p>
-        <p id="rawEng" class="text-xs text-gray-400 mt-1"></p>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div class="bg-white rounded-lg border border-gray-200 p-4 text-center">
+        <p class="text-xs font-semibold text-[#4F4F4F] uppercase tracking-wide mb-2">English</p>
+        <p id="scoreEng" class="text-4xl font-black text-[#2F3D4C]">—</p>
+        <p id="rawEng"   class="text-xs text-gray-400 mt-1"></p>
         <p id="fieldEng" class="text-xs text-gray-400 mt-0.5"></p>
       </div>
-      <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5 text-center">
-        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Math</p>
-        <p id="scoreMath" class="text-4xl font-black text-[#1d4ed8]">—</p>
-        <p id="rawMath" class="text-xs text-gray-400 mt-1"></p>
+      <div class="bg-white rounded-lg border border-gray-200 p-4 text-center">
+        <p class="text-xs font-semibold text-[#4F4F4F] uppercase tracking-wide mb-2">Math</p>
+        <p id="scoreMath" class="text-4xl font-black text-[#2F3D4C]">—</p>
+        <p id="rawMath"   class="text-xs text-gray-400 mt-1"></p>
         <p id="fieldMath" class="text-xs text-gray-400 mt-0.5"></p>
       </div>
-      <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5 text-center">
-        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Reading</p>
-        <p id="scoreRead" class="text-4xl font-black text-[#1d4ed8]">—</p>
-        <p id="rawRead" class="text-xs text-gray-400 mt-1"></p>
+      <div class="bg-white rounded-lg border border-gray-200 p-4 text-center">
+        <p class="text-xs font-semibold text-[#4F4F4F] uppercase tracking-wide mb-2">Reading</p>
+        <p id="scoreRead" class="text-4xl font-black text-[#2F3D4C]">—</p>
+        <p id="rawRead"   class="text-xs text-gray-400 mt-1"></p>
         <p id="fieldRead" class="text-xs text-gray-400 mt-0.5"></p>
       </div>
-      <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5 text-center">
-        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Science</p>
-        <p id="scoreSci" class="text-4xl font-black text-[#1d4ed8]">—</p>
-        <p id="rawSci" class="text-xs text-gray-400 mt-1"></p>
+      <div class="bg-white rounded-lg border border-gray-200 p-4 text-center">
+        <p class="text-xs font-semibold text-[#4F4F4F] uppercase tracking-wide mb-2">Science</p>
+        <p id="scoreSci" class="text-4xl font-black text-[#2F3D4C]">—</p>
+        <p id="rawSci"   class="text-xs text-gray-400 mt-1"></p>
         <p id="fieldSci" class="text-xs text-gray-400 mt-0.5"></p>
       </div>
     </div>
 
-    <!-- Top Buttons -->
-    <div class="flex gap-3 no-print">
-      <button onclick="exportPDF()" class="flex-1 bg-gray-900 hover:bg-gray-700 text-white font-semibold py-3 px-5 rounded-lg text-sm transition-colors">
-        🖨️ Print / Save PDF
+    <!-- Action Buttons (top) -->
+    <div class="flex gap-2 no-print">
+      <button onclick="exportPDF()"
+              class="flex-1 bg-[#2F3D4C] hover:bg-[#3d4f61] text-white font-semibold
+                     py-2.5 px-4 rounded-md text-sm transition-colors">
+        Print / PDF
       </button>
-      <button onclick="exportCSV()" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-5 rounded-lg text-sm transition-colors">
-        📊 Export CSV
+      <button onclick="exportCSV()"
+              class="flex-1 border border-[#2F3D4C] text-[#2F3D4C] hover:bg-[#2F3D4C]
+                     hover:text-white font-semibold py-2.5 px-4 rounded-md text-sm transition-colors">
+        Export CSV
       </button>
-      <button id="emailBtnTop" onclick="emailResults()" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-5 rounded-lg text-sm transition-colors">
-        ✉️ Email Results
+      <button id="emailBtnTop" onclick="emailResults()"
+              class="flex-1 bg-[#D7190B] hover:bg-[#b51508] text-white font-semibold
+                     py-2.5 px-4 rounded-md text-sm transition-colors">
+        ✉ Email Results
       </button>
     </div>
 
     <!-- Answer Review -->
-    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-base font-bold text-gray-900">Answer Review</h2>
-        <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer select-none">
-          <input type="checkbox" id="showMissedOnly" onchange="toggleAnswerView()" class="rounded">
+    <div class="bg-white rounded-lg border border-gray-200">
+      <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+        <h2 class="text-sm font-semibold text-[#2F3D4C]">Answer Review</h2>
+        <label class="flex items-center gap-2 text-xs text-[#4F4F4F] cursor-pointer select-none">
+          <input type="checkbox" id="showMissedOnly" onchange="toggleAnswerView()"
+                 class="rounded border-gray-300 accent-[#D7190B]" />
           Show missed only
         </label>
       </div>
-      <div id="answerTable"></div>
+      <div id="answerTable" class="overflow-x-auto"></div>
     </div>
 
     <!-- Field Questions -->
-    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-      <h2 class="text-base font-bold text-gray-900 mb-1">Field Test Questions (Not Scored)</h2>
-      <p class="text-xs text-gray-500 mb-3">Embedded research questions used by ACT. Do not affect the score.</p>
-      <div id="fieldSummaryBars" class="flex flex-wrap gap-3 mb-4"></div>
-      <div id="fieldTable"></div>
+    <div class="bg-white rounded-lg border border-gray-200">
+      <div class="px-4 py-3 border-b border-gray-100">
+        <h2 class="text-sm font-semibold text-[#2F3D4C]">Field Test Questions</h2>
+        <p class="text-xs text-gray-400 mt-0.5">
+          Unscored research questions embedded by ACT — do not affect your result.
+        </p>
+      </div>
+      <div id="fieldSummaryBars" class="flex flex-wrap gap-3 px-4 py-3 border-b border-gray-100"></div>
+      <div id="fieldTable" class="overflow-x-auto"></div>
     </div>
 
-    <!-- Bottom Buttons -->
-    <div class="flex gap-3 no-print">
-      <button onclick="exportPDF()" class="flex-1 bg-gray-900 hover:bg-gray-700 text-white font-semibold py-3 px-5 rounded-lg text-sm transition-colors">
-        🖨️ Print / Save PDF
+    <!-- Action Buttons (bottom) -->
+    <div class="flex gap-2 no-print">
+      <button onclick="exportPDF()"
+              class="flex-1 bg-[#2F3D4C] hover:bg-[#3d4f61] text-white font-semibold
+                     py-2.5 px-4 rounded-md text-sm transition-colors">
+        Print / PDF
       </button>
-      <button onclick="exportCSV()" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-5 rounded-lg text-sm transition-colors">
-        📊 Export CSV
+      <button onclick="exportCSV()"
+              class="flex-1 border border-[#2F3D4C] text-[#2F3D4C] hover:bg-[#2F3D4C]
+                     hover:text-white font-semibold py-2.5 px-4 rounded-md text-sm transition-colors">
+        Export CSV
       </button>
-      <button id="emailBtnBot" onclick="emailResults()" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-5 rounded-lg text-sm transition-colors">
-        ✉️ Email Results
+      <button id="emailBtnBot" onclick="emailResults()"
+              class="flex-1 bg-[#D7190B] hover:bg-[#b51508] text-white font-semibold
+                     py-2.5 px-4 rounded-md text-sm transition-colors">
+        ✉ Email Results
       </button>
     </div>
 
     <!-- Reset -->
-    <div class="text-center no-print">
-      <button onclick="resetApp()" class="text-sm text-gray-500 hover:text-gray-700 underline">Grade another test</button>
+    <div class="text-center no-print pb-2">
+      <button onclick="resetApp()"
+              class="text-xs text-gray-400 hover:text-[#2F3D4C] transition-colors underline">
+        Grade another test
+      </button>
     </div>
   </div>
 </main>
@@ -271,10 +353,10 @@
 // ═══════════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════════
-let currentTestId   = null;
-let currentTestData = null;
-let gradingResults  = null;
-let selectedFile    = null;
+let currentTestId    = null;
+let currentTestData  = null;
+let gradingResults   = null;
+let selectedFile     = null;
 let selectedFileMime = null;
 
 // ═══════════════════════════════════════════════════════════
@@ -321,8 +403,8 @@ async function onTestChange() {
 function switchTab(tab) {
   document.getElementById('panelUpload').classList.toggle('hidden', tab !== 'upload');
   document.getElementById('panelManual').classList.toggle('hidden', tab !== 'manual');
-  document.getElementById('tabUpload').className = 'px-6 py-4 text-sm ' + (tab === 'upload' ? 'tab-active' : 'tab-inactive');
-  document.getElementById('tabManual').className = 'px-6 py-4 text-sm ' + (tab === 'manual' ? 'tab-active' : 'tab-inactive');
+  document.getElementById('tabUpload').className = 'px-5 py-3 text-sm ' + (tab === 'upload' ? 'tab-active' : 'tab-inactive');
+  document.getElementById('tabManual').className = 'px-5 py-3 text-sm ' + (tab === 'manual' ? 'tab-active' : 'tab-inactive');
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -346,15 +428,15 @@ function loadFile(file) {
   reader.onload = (e) => {
     const previewImg = document.getElementById('previewImg');
     if (isPDF) {
-      previewImg.src = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="%231d4ed8" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><text x="6" y="18" font-size="4" fill="%231d4ed8" font-family="sans-serif">PDF</text></svg>');
-      previewImg.style.objectFit = 'contain';
-      previewImg.style.height    = '80px';
+      previewImg.src = 'data:image/svg+xml,' + encodeURIComponent(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="%232F3D4C" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>'
+      );
+      previewImg.style.height = '60px';
     } else {
       previewImg.src = e.target.result;
-      previewImg.style.objectFit = '';
-      previewImg.style.height    = '';
+      previewImg.style.height = '';
     }
-    document.getElementById('imageName').textContent = file.name + (isPDF ? ' (page 1 will be used)' : '');
+    document.getElementById('imageName').textContent = file.name + (isPDF ? ' (page 1)' : '');
     document.getElementById('imagePreview').classList.remove('hidden');
     document.getElementById('gradeBtn').classList.remove('hidden');
   };
@@ -362,28 +444,27 @@ function loadFile(file) {
 }
 
 async function gradeImage() {
-  if (!selectedFile)   return showError('Please select an image first.');
-  if (!currentTestId)  return showError('Please select a test first.');
+  if (!selectedFile)  return showError('Please select an image first.');
+  if (!currentTestId) return showError('Please select a test first.');
   showLoading(true);
   hideError();
   try {
     const base64 = await fileToBase64(selectedFile);
     const resp   = await fetch('/api/grade', {
-      method:  'POST',
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ imageBase64: base64, mimeType: selectedFileMime, testId: currentTestId }),
     });
     if (!resp.ok) { const err = await resp.json(); throw new Error(err.error || 'Server error'); }
     const omrAnswers = await resp.json();
-    const extracted  = {
+    renderResults({
       studentName:  document.getElementById('u_name').value.trim(),
       testDate:     document.getElementById('u_date').value,
       tutor:        document.getElementById('u_tutor').value.trim(),
       studentEmail: document.getElementById('u_email').value.trim(),
       parentEmail:  document.getElementById('u_pemail').value.trim(),
       ...omrAnswers,
-    };
-    renderResults(extracted);
+    });
   } catch (e) {
     showError('Grading failed: ' + e.message);
   } finally {
@@ -407,28 +488,28 @@ function buildManualGrids() {
   if (!currentTestData) return;
   const container = document.getElementById('manualGrids');
   container.innerHTML = '';
-  const sections = [
-    { key: 'english', label: 'English' },
-    { key: 'math',    label: 'Math'    },
-    { key: 'reading', label: 'Reading' },
-    { key: 'science', label: 'Science' },
-  ];
-  for (const sec of sections) {
-    const total = currentTestData.sections[sec.key].totalQuestions;
+  for (const sec of ['english','math','reading','science']) {
+    const label = sec.charAt(0).toUpperCase() + sec.slice(1);
+    const total = currentTestData.sections[sec].totalQuestions;
     const div   = document.createElement('div');
     div.innerHTML = `
-      <h3 class="text-sm font-bold text-gray-700 mb-3">${sec.label} <span class="text-gray-400 font-normal">(${total} questions)</span></h3>
-      <div class="grid gap-2" style="grid-template-columns:repeat(auto-fill,minmax(52px,1fr));" id="grid_${sec.key}"></div>
+      <h3 class="text-xs font-semibold text-[#4F4F4F] uppercase tracking-wide mb-2">
+        ${label} <span class="font-normal text-gray-400">(${total} questions)</span>
+      </h3>
+      <div class="grid gap-1.5" style="grid-template-columns:repeat(auto-fill,minmax(48px,1fr));"
+           id="grid_${sec}"></div>
     `;
     container.appendChild(div);
-    const grid = div.querySelector(`#grid_${sec.key}`);
+    const grid = div.querySelector(`#grid_${sec}`);
     for (let i = 1; i <= total; i++) {
       const cell = document.createElement('div');
-      cell.className = 'answer-cell flex flex-col items-center';
+      cell.className = 'flex flex-col items-center';
       cell.innerHTML = `
         <span class="text-xs text-gray-400 mb-0.5">${i}</span>
-        <input type="text" maxlength="1" id="ans_${sec.key}_${i}"
-               class="w-10 h-10 text-center border border-gray-300 rounded-lg text-sm font-bold uppercase focus:ring-2 focus:ring-blue-500 outline-none"
+        <input type="text" maxlength="1" id="ans_${sec}_${i}"
+               class="w-10 h-9 text-center border border-gray-300 rounded text-sm font-bold
+                      uppercase transition-colors"
+               style="text-transform:uppercase"
                oninput="this.value=this.value.toUpperCase().replace(/[^A-J?]/g,'')" />
       `;
       grid.appendChild(cell);
@@ -438,9 +519,8 @@ function buildManualGrids() {
 
 function gradeManual() {
   if (!currentTestData) return showError('Please select a test first.');
-  const sections = ['english', 'math', 'reading', 'science'];
-  const answers  = {};
-  for (const sec of sections) {
+  const answers = {};
+  for (const sec of ['english','math','reading','science']) {
     const total = currentTestData.sections[sec].totalQuestions;
     answers[sec] = [];
     for (let i = 1; i <= total; i++) {
@@ -458,28 +538,25 @@ function gradeManual() {
 }
 
 // ═══════════════════════════════════════════════════════════
-// GRADING LOGIC
+// GRADING
 // ═══════════════════════════════════════════════════════════
 function invertScaleTable(scaleObj) {
   const inv = {};
-  for (const [scale, raws] of Object.entries(scaleObj)) {
+  for (const [scale, raws] of Object.entries(scaleObj))
     for (const raw of raws) inv[raw] = parseInt(scale);
-  }
   return inv;
 }
 
 function getScaleScore(raw, invTable) {
   if (invTable[raw] !== undefined) return invTable[raw];
-  for (let r = raw - 1; r >= 0; r--) {
+  for (let r = raw - 1; r >= 0; r--)
     if (invTable[r] !== undefined) return invTable[r];
-  }
   return 1;
 }
 
 function gradeSection(studentAnswers, questions, scaleInv) {
-  let rawCorrect  = 0;
-  const allAnswers   = [];
-  const fieldResults = [];
+  let rawCorrect = 0;
+  const allAnswers = [], fieldResults = [];
   for (const q of questions) {
     const studentAns = (studentAnswers[q.number - 1] || '?').toUpperCase();
     const correct    = q.answer.toUpperCase();
@@ -499,9 +576,9 @@ function gradeSection(studentAnswers, questions, scaleInv) {
 // ═══════════════════════════════════════════════════════════
 function renderResults(extracted) {
   if (!currentTestData) return showError('No test data loaded.');
-  const td       = currentTestData;
-  const sections = ['english', 'math', 'reading', 'science'];
-  const sectionLabels = { english: 'English', math: 'Math', reading: 'Reading', science: 'Science' };
+  const td = currentTestData;
+  const sections = ['english','math','reading','science'];
+  const labels   = { english: 'English', math: 'Math', reading: 'Reading', science: 'Science' };
   const idMap    = { english: 'Eng', math: 'Math', reading: 'Read', science: 'Sci' };
 
   const sectionResults = {};
@@ -516,7 +593,7 @@ function renderResults(extracted) {
     allAnswerRows: Object.fromEntries(sections.map(s => [s, sectionResults[s].allAnswers])),
   };
 
-  // ── Scores ──
+  // Scores
   const composite = Math.round(
     ['english','math','reading'].map(s => sectionResults[s].scaleScore).reduce((a,b) => a+b, 0) / 3
   );
@@ -526,71 +603,73 @@ function renderResults(extracted) {
   document.getElementById('compositeScore').textContent = composite;
   document.getElementById('stemScore').textContent      = stem;
 
-  // ── Student Banner ──
+  // Banner
   document.getElementById('r_name').textContent  = extracted.studentName || '';
   document.getElementById('r_date').textContent  = extracted.testDate ? '📅 ' + extracted.testDate : '';
-  document.getElementById('r_tutor').textContent = extracted.tutor     ? '✉️ ' + extracted.tutor   : '';
+  document.getElementById('r_tutor').textContent = extracted.tutor     ? '✉ ' + extracted.tutor   : '';
   document.getElementById('studentBanner').classList.toggle('hidden', !extracted.studentName && !extracted.testDate);
-  document.getElementById('printMeta').textContent = [extracted.studentName, td.testName, extracted.testDate].filter(Boolean).join(' · ');
+  document.getElementById('printMeta').textContent =
+    [extracted.studentName, td.testName, extracted.testDate].filter(Boolean).join(' · ');
 
-  // ── Section Cards ──
+  // Section cards
   for (const sec of sections) {
-    const r         = sectionResults[sec];
-    const total     = td.sections[sec].questions.filter(q => !q.field).length;
-    const fieldTotal   = td.sections[sec].questions.filter(q => q.field).length;
-    const fieldCorrect = r.fieldResults.filter(fq => fq.isCorrect).length;
+    const r          = sectionResults[sec];
+    const total      = td.sections[sec].questions.filter(q => !q.field).length;
+    const fieldTotal = td.sections[sec].questions.filter(q =>  q.field).length;
+    const fieldCorr  = r.fieldResults.filter(fq => fq.isCorrect).length;
     document.getElementById('score' + idMap[sec]).textContent = r.scaleScore;
     document.getElementById('raw'   + idMap[sec]).textContent = `${r.rawCorrect}/${total} correct`;
-    document.getElementById('field' + idMap[sec]).textContent = fieldTotal > 0 ? `Field: ${fieldCorrect}/${fieldTotal}` : '';
+    document.getElementById('field' + idMap[sec]).textContent = fieldTotal > 0
+      ? `Field: ${fieldCorr}/${fieldTotal}` : '';
   }
 
-  // ── Field Questions ──
+  // Field questions
   let summaryHtml = '';
   for (const sec of sections) {
     const fqs = sectionResults[sec].fieldResults;
     if (!fqs.length) continue;
     const fc  = fqs.filter(fq => fq.isCorrect).length;
-    const ft  = fqs.length;
-    const pct = Math.round(fc / ft * 100);
-    const col = pct >= 80 ? 'text-green-700 bg-green-50 border-green-200'
-              : pct >= 60 ? 'text-amber-700 bg-amber-50 border-amber-200'
-              :             'text-red-700 bg-red-50 border-red-200';
-    summaryHtml += `<div class="border rounded-lg px-4 py-2 text-center ${col}">
-      <div class="text-xs font-semibold uppercase tracking-wide">${sectionLabels[sec]}</div>
-      <div class="text-lg font-black">${fc}/${ft}</div>
-      <div class="text-xs">${pct}% correct</div>
+    const pct = Math.round(fc / fqs.length * 100);
+    const col = pct >= 80 ? 'border-green-200 text-green-700'
+              : pct >= 60 ? 'border-amber-200 text-amber-700'
+              :             'border-red-200 text-[#D7190B]';
+    summaryHtml += `<div class="border rounded px-3 py-2 text-center text-xs ${col}">
+      <div class="font-semibold uppercase tracking-wide">${labels[sec]}</div>
+      <div class="font-black text-lg">${fc}/${fqs.length}</div>
     </div>`;
   }
-  document.getElementById('fieldSummaryBars').innerHTML = summaryHtml;
+  document.getElementById('fieldSummaryBars').innerHTML = summaryHtml || '<p class="text-xs text-gray-400">No field questions.</p>';
 
   let fieldRows = '';
   for (const sec of sections) {
     for (const fq of sectionResults[sec].fieldResults) {
-      fieldRows += `<tr class="border-b border-gray-100 text-sm">
-        <td class="py-2 px-3 text-gray-500">${sectionLabels[sec]}</td>
-        <td class="py-2 px-3 font-medium">Q${fq.number}</td>
-        <td class="py-2 px-3">${fq.studentAns}</td>
-        <td class="py-2 px-3">${fq.correct}</td>
-        <td class="py-2 px-3">${fq.isCorrect ? '✅' : '❌'}</td>
+      fieldRows += `<tr class="border-b border-gray-100 text-sm hover:bg-gray-50">
+        <td class="py-2 px-4 text-[#4F4F4F]">${labels[sec]}</td>
+        <td class="py-2 px-4 font-medium">Q${fq.number}</td>
+        <td class="py-2 px-4">${fq.studentAns}</td>
+        <td class="py-2 px-4">${fq.correct}</td>
+        <td class="py-2 px-4">${fq.isCorrect ? '✅' : '❌'}</td>
       </tr>`;
     }
   }
-  document.getElementById('fieldTable').innerHTML = `<table class="w-full text-sm">
-    <thead><tr class="bg-gray-50 text-xs font-semibold text-gray-500 uppercase">
-      <th class="py-2 px-3 text-left">Section</th>
-      <th class="py-2 px-3 text-left">Question</th>
-      <th class="py-2 px-3 text-left">Student</th>
-      <th class="py-2 px-3 text-left">Correct</th>
-      <th class="py-2 px-3 text-left">Match</th>
-    </tr></thead>
-    <tbody>${fieldRows || '<tr><td colspan="5" class="py-4 text-center text-gray-400 text-xs">No field questions</td></tr>'}</tbody>
-  </table>`;
+  document.getElementById('fieldTable').innerHTML = fieldRows
+    ? `<table class="w-full text-sm">
+         <thead><tr class="text-xs font-semibold text-[#4F4F4F] uppercase tracking-wide bg-gray-50">
+           <th class="py-2 px-4 text-left">Section</th>
+           <th class="py-2 px-4 text-left">Q#</th>
+           <th class="py-2 px-4 text-left">Student</th>
+           <th class="py-2 px-4 text-left">Correct</th>
+           <th class="py-2 px-4 text-left"></th>
+         </tr></thead>
+         <tbody>${fieldRows}</tbody>
+       </table>`
+    : '<p class="px-4 py-3 text-xs text-gray-400">No field questions in this section.</p>';
 
-  // ── Answer Review — default: show all ──
+  // Answer table — default: show all
   document.getElementById('showMissedOnly').checked = false;
   renderAnswerTable(true);
 
-  // ── Show results ──
+  // Show results
   document.getElementById('results').classList.remove('hidden');
   document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
 }
@@ -600,41 +679,42 @@ function renderResults(extracted) {
 // ═══════════════════════════════════════════════════════════
 function renderAnswerTable(showAll) {
   if (!gradingResults) return;
-  const el       = document.getElementById('answerTable');
-  const labels   = { english: 'English', math: 'Math', reading: 'Reading', science: 'Science' };
-  const sections = ['english', 'math', 'reading', 'science'];
-  let rows = '';
-  let count = 0;
+  const el      = document.getElementById('answerTable');
+  const labels  = { english: 'English', math: 'Math', reading: 'Reading', science: 'Science' };
+  let rows = '', count = 0;
 
-  for (const sec of sections) {
+  for (const sec of ['english','math','reading','science']) {
     for (const a of (gradingResults.allAnswerRows[sec] || [])) {
       if (!showAll && a.isCorrect) continue;
       count++;
-      rows += `<tr class="border-b ${a.isCorrect ? 'border-gray-100' : 'border-red-100 bg-red-50'} text-sm">
-        <td class="py-2 px-3 text-gray-500">${labels[sec]}</td>
-        <td class="py-2 px-3 font-medium">Q${a.number}</td>
-        <td class="py-2 px-3 font-bold ${a.isCorrect ? 'text-green-700' : 'text-red-600'}">${a.studentAns}</td>
-        <td class="py-2 px-3 font-bold text-gray-800">${a.correct}</td>
-        <td class="py-2 px-3 text-center">${a.isCorrect ? '✅' : '❌'}</td>
+      rows += `<tr class="border-b border-gray-100 hover:bg-gray-50 text-sm
+                          ${a.isCorrect ? '' : 'bg-red-50/40'}">
+        <td class="py-2 px-4 text-[#4F4F4F]">${labels[sec]}</td>
+        <td class="py-2 px-4 font-medium text-[#2F3D4C]">Q${a.number}</td>
+        <td class="py-2 px-4 font-bold ${a.isCorrect ? 'text-green-600' : 'text-[#D7190B]'}">${a.studentAns}</td>
+        <td class="py-2 px-4 font-bold text-[#2F3D4C]">${a.correct}</td>
+        <td class="py-2 px-4 text-center">${a.isCorrect ? '✅' : '❌'}</td>
       </tr>`;
     }
   }
 
   if (count === 0) {
-    el.innerHTML = showAll
-      ? '<p class="text-gray-400 text-sm py-4">No answers to display.</p>'
-      : '<p class="text-green-600 font-semibold text-sm py-4">🎉 Perfect score — no missed questions!</p>';
+    el.innerHTML = `<p class="px-4 py-4 text-sm ${showAll ? 'text-gray-400' : 'text-green-600 font-semibold'}">
+      ${showAll ? 'No answers to display.' : '🎉 No missed questions!'}
+    </p>`;
     return;
   }
 
   el.innerHTML = `<table class="w-full text-sm">
-    <thead><tr class="bg-gray-50 text-xs font-semibold text-gray-500 uppercase">
-      <th class="py-2 px-3 text-left">Section</th>
-      <th class="py-2 px-3 text-left">Question</th>
-      <th class="py-2 px-3 text-left">Student</th>
-      <th class="py-2 px-3 text-left">Correct</th>
-      <th class="py-2 px-3 text-left">✔</th>
-    </tr></thead>
+    <thead>
+      <tr class="text-xs font-semibold text-[#4F4F4F] uppercase tracking-wide bg-gray-50 border-b border-gray-200">
+        <th class="py-2 px-4 text-left">Section</th>
+        <th class="py-2 px-4 text-left">Q#</th>
+        <th class="py-2 px-4 text-left">Student</th>
+        <th class="py-2 px-4 text-left">Correct</th>
+        <th class="py-2 px-4 text-left"></th>
+      </tr>
+    </thead>
     <tbody>${rows}</tbody>
   </table>`;
 }
@@ -644,7 +724,7 @@ function toggleAnswerView() {
 }
 
 // ═══════════════════════════════════════════════════════════
-// EMAIL RESULTS
+// EMAIL
 // ═══════════════════════════════════════════════════════════
 async function emailResults() {
   if (!gradingResults) return;
@@ -660,9 +740,12 @@ async function emailResults() {
 
   const sections = {};
   for (const sec of ['english','math','reading','science']) {
-    const r     = sectionResults[sec];
-    const total = td.sections[sec].questions.filter(q => !q.field).length;
-    sections[sec] = { scale: r.scaleScore, raw: r.rawCorrect, total };
+    const r = sectionResults[sec];
+    sections[sec] = {
+      scale: r.scaleScore,
+      raw:   r.rawCorrect,
+      total: td.sections[sec].questions.filter(q => !q.field).length,
+    };
   }
 
   const payload = {
@@ -671,43 +754,40 @@ async function emailResults() {
     tutorEmail:   extracted.tutor        || '',
     studentEmail: extracted.studentEmail || '',
     parentEmail:  extracted.parentEmail  || '',
-    testName:     td.testName,
-    composite,
-    stem,
-    sections,
+    testName: td.testName, composite, stem, sections,
     answers: gradingResults.allAnswerRows,
   };
 
-  const btns = [document.getElementById('emailBtnTop'), document.getElementById('emailBtnBot')];
+  const btns     = [document.getElementById('emailBtnTop'), document.getElementById('emailBtnBot')];
   const origText = btns[0].textContent;
-  btns.forEach(b => { b.textContent = '⏳ Sending…'; b.disabled = true; });
+  btns.forEach(b => { b.textContent = 'Sending…'; b.disabled = true; b.style.opacity = '0.7'; });
 
   try {
     const resp = await fetch('/api/email', {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
     const data = await resp.json();
     if (!resp.ok) throw new Error(data.error || 'Email failed');
     btns.forEach(b => {
-      b.textContent = '✅ Sent!';
-      b.className = b.className.replace(/bg-\S+/g, 'bg-green-600');
+      b.textContent = '✓ Sent!';
+      b.style.opacity = '1';
+      b.style.background = '#16a34a';
     });
     setTimeout(() => btns.forEach(b => {
       b.textContent = origText;
-      b.disabled    = false;
-      b.className   = b.className.replace(/bg-\S+/g, 'bg-blue-500 hover:bg-blue-600');
+      b.disabled = false;
+      b.style.background = '';
     }), 4000);
   } catch (e) {
     btns.forEach(b => {
-      b.textContent = '❌ Failed — ' + e.message;
-      b.className   = b.className.replace(/bg-\S+/g, 'bg-red-600');
+      b.textContent = '✗ Failed';
+      b.style.opacity = '1';
     });
+    showError('Email failed: ' + e.message);
     setTimeout(() => btns.forEach(b => {
       b.textContent = origText;
-      b.disabled    = false;
-      b.className   = b.className.replace(/bg-\S+/g, 'bg-blue-500 hover:bg-blue-600');
+      b.disabled = false;
     }), 5000);
   }
 }
@@ -720,45 +800,33 @@ function exportPDF() { window.print(); }
 function exportCSV() {
   if (!gradingResults) return;
   const { extracted, sectionResults } = gradingResults;
-  const td = currentTestData;
-  const sections = ['english', 'math', 'reading', 'science'];
-
-  const composite = Math.round(
-    ['english','math','reading'].map(s => sectionResults[s].scaleScore).reduce((a,b) => a+b, 0) / 3
-  );
-  const stem = Math.round(
-    ['math','science'].map(s => sectionResults[s].scaleScore).reduce((a,b) => a+b, 0) / 2
-  );
+  const td       = currentTestData;
+  const sections = ['english','math','reading','science'];
+  const composite = Math.round(['english','math','reading'].map(s => sectionResults[s].scaleScore).reduce((a,b) => a+b,0)/3);
+  const stem      = Math.round(['math','science'].map(s => sectionResults[s].scaleScore).reduce((a,b) => a+b,0)/2);
 
   const rows = [
-    ['Student', 'Test', 'English', 'Math', 'Reading', 'Science', 'ACT Composite (ENG+MATH+READ)', 'STEM Score (MATH+SCI)'],
-    [
-      extracted.studentName || '', td.testName,
-      sectionResults.english.scaleScore, sectionResults.math.scaleScore,
-      sectionResults.reading.scaleScore, sectionResults.science.scaleScore,
-      composite, stem,
-    ],
+    ['Student','Test','English','Math','Reading','Science','ACT Composite (ENG+MATH+READ)','STEM Score (MATH+SCI)'],
+    [extracted.studentName||'', td.testName,
+     sectionResults.english.scaleScore, sectionResults.math.scaleScore,
+     sectionResults.reading.scaleScore, sectionResults.science.scaleScore,
+     composite, stem],
     [],
-    ['Student', 'Test', 'Section', 'Question', 'Answered', 'Correct', 'IsCorrect', 'IsField'],
+    ['Student','Test','Section','Question','Answered','Correct','IsCorrect','IsField'],
   ];
-
   for (const sec of sections) {
     for (const q of td.sections[sec].questions) {
-      const ans = (extracted[sec][q.number - 1] || '?').toUpperCase();
-      rows.push([
-        extracted.studentName || '', td.testName,
-        sec, q.number, ans, q.answer,
-        String(ans === q.answer), String(q.field),
-      ]);
+      const ans = (extracted[sec][q.number-1]||'?').toUpperCase();
+      rows.push([extracted.studentName||'', td.testName, sec, q.number, ans, q.answer,
+                 String(ans===q.answer), String(q.field)]);
     }
   }
-
   const csv  = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n');
   const blob = new Blob([csv], { type: 'text/csv' });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
-  a.href     = url;
-  a.download = `ACT_${(extracted.studentName || 'student').replace(/\s+/g,'_')}_${td.testId}.csv`;
+  a.href = url;
+  a.download = `ACT_${(extracted.studentName||'student').replace(/\s+/g,'_')}_${td.testId}.csv`;
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -772,7 +840,7 @@ function showLoading(show) {
 }
 function showError(msg) {
   const el = document.getElementById('errorBar');
-  el.textContent = '⚠️ ' + msg;
+  el.textContent = msg;
   el.classList.remove('hidden');
 }
 function hideError() { document.getElementById('errorBar').classList.add('hidden'); }
@@ -781,8 +849,7 @@ function resetApp() {
   document.getElementById('inputPanel').classList.remove('hidden');
   document.getElementById('imagePreview').classList.add('hidden');
   document.getElementById('gradeBtn').classList.add('hidden');
-  gradingResults = null;
-  selectedFile   = null;
+  gradingResults = selectedFile = null;
   document.getElementById('fileInput').value = '';
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
