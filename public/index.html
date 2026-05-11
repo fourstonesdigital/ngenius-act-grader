@@ -454,14 +454,15 @@ async function gradeImage() {
     });
     if (!resp.ok) { const err = await resp.json(); throw new Error(err.error || 'Server error'); }
     const omrAnswers = await resp.json();
-    renderResults({
+    const extracted = {
       studentName:  document.getElementById('u_name').value.trim(),
       testDate:     document.getElementById('u_date').value,
       tutor:        document.getElementById('u_tutor').value.trim(),
       studentEmail: document.getElementById('u_email').value.trim(),
       parentEmail:  document.getElementById('u_pemail').value.trim(),
       ...omrAnswers,
-    });
+    };
+    renderResults(extracted, { imageBase64: base64, imageMimeType: selectedFileMime, imageFilename: selectedFile.name });
   } catch (e) {
     showError('Grading failed: ' + e.message);
   } finally {
@@ -531,7 +532,7 @@ function gradeManual() {
     studentEmail: document.getElementById('m_email').value.trim(),
     parentEmail:  document.getElementById('m_pemail').value.trim(),
     ...answers,
-  });
+  }, null); // no scan attachment for manual entry
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -571,7 +572,7 @@ function gradeSection(studentAnswers, questions, scaleInv) {
 // ═══════════════════════════════════════════════════════════
 // RENDER RESULTS
 // ═══════════════════════════════════════════════════════════
-function renderResults(extracted) {
+function renderResults(extracted, scanAttachment) {
   if (!currentTestData) return showError('No test data loaded.');
   const td = currentTestData;
   const sections = ['english','math','reading','science'];
@@ -588,6 +589,7 @@ function renderResults(extracted) {
     extracted,
     sectionResults,
     allAnswerRows: Object.fromEntries(sections.map(s => [s, sectionResults[s].allAnswers])),
+    scanAttachment: scanAttachment || null,
   };
 
   // Scores
@@ -753,7 +755,9 @@ async function emailResults() {
     parentEmail:  extracted.parentEmail  || '',
     testName: td.testName, composite, stem, sections,
     answers: gradingResults.allAnswerRows,
+    ...(gradingResults.scanAttachment || {}),
   };
+
 
   const btns     = [document.getElementById('emailBtnTop'), document.getElementById('emailBtnBot')];
   const origText = btns[0].textContent;
