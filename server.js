@@ -172,19 +172,21 @@ app.post('/api/email', async (req, res) => {
 <div style="max-width:680px;margin:0 auto;">
 
   <!-- Header -->
-  <div style="background:#1d4ed8;border-radius:12px 12px 0 0;padding:28px 32px;text-align:center;">
-    <div style="display:inline-block;background:white;border-radius:8px;padding:4px 10px;font-weight:900;color:#1d4ed8;font-size:14px;margin-bottom:10px;">nG</div>
-    <h1 style="color:white;margin:0;font-size:22px;font-weight:800;letter-spacing:-0.5px;">nGenius Prep</h1>
-    <p style="color:#bfdbfe;margin:4px 0 0;font-size:14px;">ACT Score Report</p>
+  <div style="background:#2F3D4C;border-radius:12px 12px 0 0;padding:24px 32px;text-align:center;">
+    <div style="background:white;display:inline-block;border-radius:6px;padding:8px 16px;margin-bottom:12px;">
+      <img src="https://score.ngeniusprep.com/logo.webp" alt="nGenius Prep"
+           style="height:36px;width:auto;display:block;" />
+    </div>
+    <p style="color:#94a3b8;margin:0;font-size:13px;">ACT Score Report</p>
   </div>
 
   <!-- Student Info Bar -->
-  <div style="background:#eff6ff;border-left:4px solid #1d4ed8;padding:14px 28px;">
+  <div style="background:#f1f4f6;border-left:4px solid #2F3D4C;padding:14px 28px;">
     <table style="width:100%;border-collapse:collapse;">
       <tr>
-        <td style="padding:3px 12px 3px 0;font-size:13px;"><strong style="color:#1e40af;">Student:</strong> <span style="color:#1e3a8a;">${studentName || 'N/A'}</span></td>
-        <td style="padding:3px 12px;font-size:13px;"><strong style="color:#1e40af;">Test:</strong> <span style="color:#1e3a8a;">${testName || ''}</span></td>
-        <td style="padding:3px 0 3px 12px;font-size:13px;"><strong style="color:#1e40af;">Date:</strong> <span style="color:#1e3a8a;">${formattedDate || 'N/A'}</span></td>
+        <td style="padding:3px 12px 3px 0;font-size:13px;"><strong style="color:#2F3D4C;">Student:</strong> <span style="color:#1a1a1a;">${studentName || 'N/A'}</span></td>
+        <td style="padding:3px 12px;font-size:13px;"><strong style="color:#2F3D4C;">Test:</strong> <span style="color:#1a1a1a;">${testName || ''}</span></td>
+        <td style="padding:3px 0 3px 12px;font-size:13px;"><strong style="color:#2F3D4C;">Date:</strong> <span style="color:#1a1a1a;">${formattedDate || 'N/A'}</span></td>
       </tr>
     </table>
   </div>
@@ -193,7 +195,7 @@ app.post('/api/email', async (req, res) => {
   <div style="background:white;padding:32px;border-radius:0 0 12px 12px;">
 
     <!-- ACT Composite -->
-    <div style="background:linear-gradient(135deg,#1d4ed8,#3b82f6);border-radius:16px;padding:32px;text-align:center;margin-bottom:16px;">
+    <div style="background:#2F3D4C;border-radius:12px;padding:32px;text-align:center;margin-bottom:16px;">
       <p style="color:#bfdbfe;font-size:11px;letter-spacing:2px;text-transform:uppercase;margin:0 0 6px;font-weight:600;">ACT Composite Score</p>
       <p style="color:#dbeafe;font-size:11px;margin:0 0 12px;">(English + Math + Reading)</p>
       <p style="color:white;font-size:72px;font-weight:900;margin:0;line-height:1;">${composite}</p>
@@ -201,11 +203,11 @@ app.post('/api/email', async (req, res) => {
     </div>
 
     <!-- STEM Score -->
-    <div style="background:linear-gradient(135deg,#059669,#0d9488);border-radius:16px;padding:24px;text-align:center;margin-bottom:28px;">
-      <p style="color:#a7f3d0;font-size:11px;letter-spacing:2px;text-transform:uppercase;margin:0 0 4px;font-weight:600;">STEM Score</p>
-      <p style="color:#d1fae5;font-size:11px;margin:0 0 8px;">(Math + Science)</p>
-      <p style="color:white;font-size:52px;font-weight:900;margin:0;line-height:1;">${stem}</p>
-      <p style="color:#a7f3d0;font-size:13px;margin:8px 0 0;">out of 36</p>
+    <div style="background:#fff;border:2px solid #2F3D4C;border-radius:12px;padding:24px;text-align:center;margin-bottom:28px;">
+      <p style="color:#4F4F4F;font-size:11px;letter-spacing:2px;text-transform:uppercase;margin:0 0 4px;font-weight:600;">STEM Score</p>
+      <p style="color:#9ca3af;font-size:11px;margin:0 0 8px;">(Math + Science)</p>
+      <p style="color:#2F3D4C;font-size:52px;font-weight:900;margin:0;line-height:1;">${stem}</p>
+      <p style="color:#9ca3af;font-size:13px;margin:8px 0 0;">out of 36</p>
     </div>
 
     <!-- Section Scores -->
