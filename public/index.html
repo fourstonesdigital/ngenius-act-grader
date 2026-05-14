@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v2026.05.10.2 -->
+<!-- v2026.05.14.3 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -44,9 +44,7 @@
 <header class="bg-[#4f4f4f] no-print">
   <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
     <div class="flex items-center gap-3">
-      <div class="bg-white rounded px-2.5 py-1.5">
-        <img src="/logo-color-blackbg.png" alt="nGenius Prep" class="h-10 w-auto" />
-      </div>
+      <img src="/logo-color-blackbg.png" alt="nGenius Prep" class="h-10 w-auto rounded" />
       <div class="flex items-baseline gap-2">
         <span class="text-slate-300 text-sm">ACT Score Report</span>
         <span class="text-slate-500 text-xs font-mono">v2.2</span>
@@ -288,11 +286,41 @@
                      hover:text-white font-semibold py-2.5 px-4 rounded-md text-sm transition-colors">
         Export CSV
       </button>
-      <button id="emailBtnTop" onclick="emailResults()"
-              class="flex-1 bg-[#D7190B] hover:bg-[#b51508] text-white font-semibold
-                     py-2.5 px-4 rounded-md text-sm transition-colors">
-        ✉ Email Results
-      </button>
+    </div>
+
+    <!-- Tutor Commentary Panel -->
+    <div class="bg-white rounded-lg border border-gray-200 no-print" id="commentaryPanel">
+      <div class="px-4 py-3 border-b border-gray-100">
+        <h2 class="text-sm font-semibold text-[#2F3D4C]">Tutor Commentary</h2>
+        <p class="text-xs text-gray-400 mt-0.5">Add past scores or session notes, then generate a personalized email draft with Claude.</p>
+      </div>
+      <div class="p-4 space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-[#4F4F4F] mb-1">Past Scores / Notes</label>
+          <textarea id="tutorNotes" rows="3"
+                    placeholder="e.g. Previous composite: 24. Student improved 3 pts in English. Struggled with Math timing — working on pacing strategy."
+                    class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-[#2F3D4C] focus:border-[#2F3D4C]"></textarea>
+        </div>
+        <button onclick="generateEmailDraft()" id="genDraftBtn"
+                class="w-full border-2 border-[#2F3D4C] text-[#2F3D4C] hover:bg-[#2F3D4C] hover:text-white
+                       font-semibold py-2 px-4 rounded-md text-sm transition-colors">
+          ✨ Generate Email Draft
+        </button>
+
+        <!-- Draft preview — hidden until generated -->
+        <div id="draftPreview" class="hidden space-y-2">
+          <label class="block text-xs font-semibold text-[#4F4F4F]">Email Commentary <span class="font-normal text-gray-400">(editable)</span></label>
+          <textarea id="draftText" rows="7"
+                    class="w-full border-2 border-[#2F3D4C] rounded-md px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-[#2F3D4C]"></textarea>
+          <p class="text-xs text-gray-400">This commentary will appear at the top of the email, above the scores. Edit freely before sending.</p>
+        </div>
+
+        <button id="emailBtnTop" onclick="emailResults()"
+                class="w-full bg-[#D7190B] hover:bg-[#b51508] text-white font-semibold
+                       py-2.5 px-4 rounded-md text-sm transition-colors">
+          ✉ Send Score Report
+        </button>
+      </div>
     </div>
 
     <!-- Answer Review -->
@@ -320,31 +348,33 @@
       <div id="fieldTable" class="overflow-x-auto"></div>
     </div>
 
-    <!-- Action Buttons (bottom) -->
-    <div class="flex gap-2 no-print">
-      <button onclick="exportPDF()"
-              class="flex-1 bg-[#2F3D4C] hover:bg-[#3d4f61] text-white font-semibold
-                     py-2.5 px-4 rounded-md text-sm transition-colors">
-        Print / PDF
-      </button>
-      <button onclick="exportCSV()"
-              class="flex-1 border border-[#2F3D4C] text-[#2F3D4C] hover:bg-[#2F3D4C]
-                     hover:text-white font-semibold py-2.5 px-4 rounded-md text-sm transition-colors">
-        Export CSV
-      </button>
-      <button id="emailBtnBot" onclick="emailResults()"
-              class="flex-1 bg-[#D7190B] hover:bg-[#b51508] text-white font-semibold
-                     py-2.5 px-4 rounded-md text-sm transition-colors">
-        ✉ Email Results
-      </button>
-    </div>
-
     <!-- Reset -->
     <div class="text-center no-print pb-2">
       <button onclick="resetApp()"
               class="text-xs text-gray-400 hover:text-[#2F3D4C] transition-colors underline">
         Grade another test
       </button>
+    </div>
+  </div>
+
+  <!-- Confirmation Screen -->
+  <div id="confirmationScreen" class="hidden mt-5">
+    <div class="bg-white rounded-lg border border-gray-200 p-10 text-center">
+      <div class="text-6xl mb-4">✅</div>
+      <h2 class="text-2xl font-bold text-[#2F3D4C] mb-2">Email Sent!</h2>
+      <p id="confirmMsg" class="text-gray-500 text-sm mb-8"></p>
+      <div class="flex gap-3 max-w-xs mx-auto">
+        <button onclick="resetApp()"
+                class="flex-1 bg-[#D7190B] hover:bg-[#b51508] text-white font-semibold
+                       py-2.5 px-4 rounded-md text-sm transition-colors">
+          Grade New Test
+        </button>
+        <button onclick="backToResults()"
+                class="flex-1 border border-[#2F3D4C] text-[#2F3D4C] hover:bg-[#2F3D4C]
+                       hover:text-white font-semibold py-2.5 px-4 rounded-md text-sm transition-colors">
+          Back to Scores
+        </button>
+      </div>
     </div>
   </div>
 </main>
@@ -726,6 +756,57 @@ function toggleAnswerView() {
 }
 
 // ═══════════════════════════════════════════════════════════
+// EMAIL DRAFT GENERATION
+// ═══════════════════════════════════════════════════════════
+async function generateEmailDraft() {
+  if (!gradingResults) return;
+  const { extracted, sectionResults } = gradingResults;
+  const td = currentTestData;
+
+  const composite = Math.round(
+    ['english','math','reading'].map(s => sectionResults[s].scaleScore).reduce((a,b) => a+b, 0) / 3
+  );
+  const stem = Math.round(
+    ['math','science'].map(s => sectionResults[s].scaleScore).reduce((a,b) => a+b, 0) / 2
+  );
+  const sections = {};
+  for (const sec of ['english','math','reading','science']) {
+    const r = sectionResults[sec];
+    sections[sec] = { scale: r.scaleScore, raw: r.rawCorrect, total: td.sections[sec].questions.filter(q => !q.field).length };
+  }
+
+  const tutorNotes = document.getElementById('tutorNotes').value.trim();
+  const btn = document.getElementById('genDraftBtn');
+  const origText = btn.textContent;
+  btn.textContent = '⏳ Generating…';
+  btn.disabled = true;
+  hideError();
+
+  try {
+    const resp = await fetch('/api/generate-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        studentName: extracted.studentName,
+        testName: td.testName,
+        testDate: extracted.testDate,
+        composite, stem, sections, tutorNotes,
+      }),
+    });
+    if (!resp.ok) { const e = await resp.json(); throw new Error(e.error); }
+    const data = await resp.json();
+    document.getElementById('draftText').value = data.commentary;
+    document.getElementById('draftPreview').classList.remove('hidden');
+    document.getElementById('draftText').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  } catch (e) {
+    showError('Could not generate draft: ' + e.message);
+  } finally {
+    btn.textContent = origText;
+    btn.disabled = false;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
 // EMAIL
 // ═══════════════════════════════════════════════════════════
 async function emailResults() {
@@ -743,12 +824,10 @@ async function emailResults() {
   const sections = {};
   for (const sec of ['english','math','reading','science']) {
     const r = sectionResults[sec];
-    sections[sec] = {
-      scale: r.scaleScore,
-      raw:   r.rawCorrect,
-      total: td.sections[sec].questions.filter(q => !q.field).length,
-    };
+    sections[sec] = { scale: r.scaleScore, raw: r.rawCorrect, total: td.sections[sec].questions.filter(q => !q.field).length };
   }
+
+  const aiComment = document.getElementById('draftText').value.trim() || '';
 
   const payload = {
     studentName:  extracted.studentName  || '',
@@ -758,13 +837,16 @@ async function emailResults() {
     parentEmail:  extracted.parentEmail  || '',
     testName: td.testName, composite, stem, sections,
     answers: gradingResults.allAnswerRows,
+    aiComment,
     ...(gradingResults.scanAttachment || {}),
   };
 
-
-  const btns     = [document.getElementById('emailBtnTop'), document.getElementById('emailBtnBot')];
-  const origText = btns[0].textContent;
-  btns.forEach(b => { b.textContent = 'Sending…'; b.disabled = true; b.style.opacity = '0.7'; });
+  const btn = document.getElementById('emailBtnTop');
+  const origText = btn.textContent;
+  btn.textContent = 'Sending…';
+  btn.disabled = true;
+  btn.style.opacity = '0.7';
+  hideError();
 
   try {
     const resp = await fetch('/api/email', {
@@ -773,27 +855,36 @@ async function emailResults() {
     });
     const data = await resp.json();
     if (!resp.ok) throw new Error(data.error || 'Email failed');
-    btns.forEach(b => {
-      b.textContent = '✓ Sent!';
-      b.style.opacity = '1';
-      b.style.background = '#16a34a';
-    });
-    setTimeout(() => btns.forEach(b => {
-      b.textContent = origText;
-      b.disabled = false;
-      b.style.background = '';
-    }), 4000);
+
+    // Show confirmation screen
+    const recipients = [extracted.studentEmail, extracted.parentEmail].filter(Boolean).join(' and ') || extracted.tutor || 'the recipients';
+    showConfirmation(extracted.studentName, recipients);
   } catch (e) {
-    btns.forEach(b => {
-      b.textContent = '✗ Failed';
-      b.style.opacity = '1';
-    });
+    btn.textContent = '✗ Failed';
+    btn.style.opacity = '1';
     showError('Email failed: ' + e.message);
-    setTimeout(() => btns.forEach(b => {
-      b.textContent = origText;
-      b.disabled = false;
-    }), 5000);
+    setTimeout(() => { btn.textContent = origText; btn.disabled = false; btn.style.opacity = '1'; }, 5000);
   }
+}
+
+function showConfirmation(studentName, recipients) {
+  document.getElementById('results').classList.add('hidden');
+  const screen = document.getElementById('confirmationScreen');
+  document.getElementById('confirmMsg').textContent =
+    `Score report for ${studentName || 'student'} sent to ${recipients}.`;
+  screen.classList.remove('hidden');
+  screen.scrollIntoView({ behavior: 'smooth' });
+}
+
+function backToResults() {
+  document.getElementById('confirmationScreen').classList.add('hidden');
+  document.getElementById('results').classList.remove('hidden');
+  // Re-enable email button
+  const btn = document.getElementById('emailBtnTop');
+  btn.textContent = '✉ Send Score Report';
+  btn.disabled = false;
+  btn.style.opacity = '1';
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -850,9 +941,18 @@ function showError(msg) {
 function hideError() { document.getElementById('errorBar').classList.add('hidden'); }
 function resetApp() {
   document.getElementById('results').classList.add('hidden');
+  document.getElementById('confirmationScreen').classList.add('hidden');
   document.getElementById('inputPanel').classList.remove('hidden');
   document.getElementById('imagePreview').classList.add('hidden');
   document.getElementById('gradeBtn').classList.add('hidden');
+  // Reset commentary panel
+  document.getElementById('tutorNotes').value = '';
+  document.getElementById('draftText').value = '';
+  document.getElementById('draftPreview').classList.add('hidden');
+  const btn = document.getElementById('emailBtnTop');
+  btn.textContent = '✉ Send Score Report';
+  btn.disabled = false;
+  btn.style.opacity = '1';
   gradingResults = selectedFile = null;
   document.getElementById('fileInput').value = '';
   window.scrollTo({ top: 0, behavior: 'smooth' });

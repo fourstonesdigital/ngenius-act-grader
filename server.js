@@ -8,7 +8,8 @@ import { tmpdir } from 'os';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
 const port = process.env.PORT || 3000;
-const POSTMARK_KEY = process.env.POSTMARK_API_KEY;
+const POSTMARK_KEY   = process.env.POSTMARK_API_KEY;
+const ANTHROPIC_KEY  = process.env.ANTHROPIC_API_KEY;
 
 app.use(express.json({ limit: '20mb' }));
 app.use(express.static(join(__dirname, 'public')));
@@ -114,12 +115,67 @@ app.post('/api/grade', async (req, res) => {
   }
 });
 
+// ── Generate AI email commentary ─────────────────────────
+app.post('/api/generate-email', async (req, res) => {
+  if (!ANTHROPIC_KEY) return res.status(500).json({ error: 'Anthropic API key not configured' });
+  const { studentName, testName, testDate, composite, stem, sections, tutorNotes } = req.body;
+  const sectionLabels = { english: 'English', math: 'Math', reading: 'Reading', science: 'Science' };
+  const sectionLines = ['english','math','reading','science']
+    .map(s => `  - ${sectionLabels[s]}: ${sections[s]?.scale}/36 (${sections[s]?.raw}/${sections[s]?.total} correct)`)
+    .join('\n');
+
+  const prompt = `You are a professional ACT tutor at nGenius Prep writing a personal score commentary for a student and their parents.
+
+Student: ${studentName}
+Test: ${testName}
+Date: ${testDate || 'recent'}
+ACT Composite: ${composite}/36  (English + Math + Reading)
+STEM Score: ${stem}/36  (Math + Science)
+Section scores:
+${sectionLines}
+
+Tutor notes / context:
+${tutorNotes || 'No additional notes provided.'}
+
+Write a warm, professional 2-3 paragraph commentary:
+- Para 1: Acknowledge the test performance, mention the composite score naturally
+- Para 2: Highlight strengths and 1-2 focus areas; weave in tutor notes if provided
+- Para 3: Encouragement and concrete next step
+
+Tone: personal, honest, positive but not generic. Write as if you personally tutored this student.
+End with: "Your nGenius Prep Tutor Team"
+Output ONLY the paragraphs — no greeting, no subject line.`;
+
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-opus-4-5',
+        max_tokens: 700,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    });
+    if (!r.ok) { const e = await r.json(); throw new Error(e.error?.message || `Anthropic ${r.status}`); }
+    const d = await r.json();
+    res.json({ commentary: d.content[0].text.trim() });
+  } catch (err) {
+    console.error('generate-email error:', err);
+    res.status(500).json({ error: 'Failed to generate commentary: ' + err.message });
+  }
+});
+
 // ── Email results via Postmark ────────────────────────────
 app.post('/api/email', async (req, res) => {
   const {
     studentName, testDate, tutorEmail, studentEmail, parentEmail,
     testName, composite, stem, sections, answers,
     imageBase64, imageMimeType, imageFilename,
+    aiComment,
   } = req.body;
 
   const toList = [studentEmail, parentEmail].filter(Boolean);
@@ -189,6 +245,13 @@ app.post('/api/email', async (req, res) => {
       </tr>
     </table>
   </div>
+
+${aiComment ? `
+  <!-- Tutor Commentary -->
+  <div style="background:#fafafa;border-left:4px solid #D7190B;padding:20px 28px;">
+    <p style="font-size:11px;font-weight:700;color:#D7190B;text-transform:uppercase;letter-spacing:1.5px;margin:0 0 12px;">From Your Tutor</p>
+    ${aiComment.split('\n\n').filter(p=>p.trim()).map(p=>`<p style="font-size:14px;color:#374151;line-height:1.7;margin:0 0 10px;">${p.replace(/\n/g,'<br/>')}</p>`).join('')}
+  </div>` : ''}
 
   <!-- Body -->
   <div style="background:white;padding:32px;border-radius:0 0 12px 12px;">
