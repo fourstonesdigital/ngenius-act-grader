@@ -173,9 +173,9 @@ app.post('/api/email', async (req, res) => {
 <div style="max-width:680px;margin:0 auto;">
 
   <!-- Header -->
-  <div style="background:#2F3D4C;border-radius:12px 12px 0 0;padding:28px 32px;text-align:center;">
-    <img src="https://score.ngeniusprep.com/logo.png" alt="nGenius Prep"
-         style="height:44px;width:auto;display:block;margin:0 auto 16px;" />
+  <div style="background:#4f4f4f;border-radius:12px 12px 0 0;padding:28px 32px;text-align:center;">
+    <img src="https://score.ngeniusprep.com/logo-color-blackbg.png" alt="nGenius Prep"
+         style="height:60px;width:auto;display:block;margin:0 auto 16px;" />
     <h1 style="color:white;margin:0;font-size:22px;font-weight:800;letter-spacing:-0.3px;">ACT Mock Test Score Report</h1>
   </div>
 
